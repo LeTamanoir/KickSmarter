@@ -1,0 +1,16 @@
+type milestone = {
+
+};
+
+type project = {
+    title: string,
+    description: string,
+    milestones: list<milestone>,
+    target_price: ,
+    current_price: tez,
+    investors: , // address => donate
+    start_date: ,
+    due_date: ,
+};
+
+type storage = big_map<address, list<projects>>;
