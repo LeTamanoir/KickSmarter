@@ -1,36 +1,34 @@
 export type milestone = {
-  title: string,
-  description: string,
-  required_amount: nat,
-  start_date: nat,
-  due_date: nat
+  metadata: string,
+  requiredAmount: nat,
+  startDate: nat,
+  dueDate: nat
 };
 
 export type investor = {
   rating: nat,
-  nb_fake_investments: nat,
-  nb_real_investments: nat
+  nbFakeInvestments: nat,
+  nbRealInvestments: nat
 };
 
-export type project_maker = {
+export type projectMaker = {
   rating: nat,
-  nb_fake_projects: nat,
-  nb_real_projects: nat
+  nbFakeProjects: nat,
+  nbRealProjects: nat
 };
 
 export type project = {
-  title: string,
-  description: string,
+  metadata: string,
   milestones: list<milestone>,
-  target_price: nat,
-  current_price: tez,
-  investors: big_map<address, nat>,
-  start_date: nat,
-  due_date: nat
+  targetPrice: nat,
+  currentPrice: tez,
+  investors: map<address, nat>,
+  startDate: nat,
+  dueDate: nat
 };
 
 export type storage = {
   investors: big_map<address, investor>,
-  project_makers: big_map<address, project_maker>,
+  projectMakers: big_map<address, projectMaker>,
   projects: big_map<address, list<project>>
 };

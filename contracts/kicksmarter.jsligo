@@ -1,0 +1,32 @@
+#import "./types.jsligo" "TYPES"
+namespace Kicksmarter {
+  /* @entry */
+  const postProject = (project: TYPES.project, storage: TYPES.storage)
+    : [list<operation>, TYPES.storage] => {
+    const sender = Tezos.get_sender();
+    const newProjects =
+      match(
+        Big_map.find_opt(sender, storage.projects),
+        {
+          Some: (projects) => list([project, ...projects]),
+          None: () => list([project])
+        }
+      );
+    const newStorage =
+      {
+        ...storage,
+        projects: Big_map.update(sender, Some(newProjects), storage.projects)
+      };
+    return [list([]), newStorage]
+  };
+  /* @entry */
+  const clean = (_: unit, _: TYPES.storage): [list<operation>, TYPES.storage] => {
+    const newStorage: TYPES.storage =
+      {
+        investors: Big_map.empty,
+        projectMakers: Big_map.empty,
+        projects: Big_map.empty
+      };
+    return [list([]), newStorage]
+  }
+};
