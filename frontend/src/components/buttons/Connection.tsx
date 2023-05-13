@@ -1,4 +1,4 @@
-import { Button, HStack, Image, Text, useTab } from '@chakra-ui/react';
+import { Button, HStack, Image, Text } from '@chakra-ui/react';
 import { useTezosContext } from '@/contexts/TezosContext';
 import { useEffect } from 'react';
 import { CONTRACT_ADDRESS } from '@/constants';
@@ -27,10 +27,10 @@ const Connection = () => {
 
     return (
         <>
-            <Button bg="#7CB4C4">
+            <Button bg="#7CB4C4" onClick={buttonAction}>
                 <HStack>
                     <Image w="30px" src="/assets/tezos.png" />
-                    <Text onClick={buttonAction}>{!connected ? "Connect wallet" : "Disconnect wallet"}</Text>
+                    <Text>{!connected ? "Connect wallet" : "Disconnect wallet"}</Text>
                 </HStack>
             </Button>
         </>
