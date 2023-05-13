@@ -1,5 +1,74 @@
 #import "./types.jsligo" "TYPES"
 namespace Kicksmarter {
+  type abort_project_param = { id: nat, milestone_id: nat };
+  /* @entry */
+  const abort_project = (param: abort_project_param, storage: TYPES.storage)
+    : [list<operation>, TYPES.storage] => {
+    const project =
+      match(
+        Big_map.find_opt(param.id, storage.projects),
+        {
+          Some: (project) => project,
+          None: () => failwith("project not found")
+        }
+      );
+    let milestone =
+      match(
+        Map.find_opt(param.milestone_id, project.milestones),
+        {
+          Some: (milestone) => milestone,
+          None: () => failwith("milestone not found")
+        }
+      );
+    let next_miletone_id = param.milestone_id + (1 as nat);
+    let next_milestone =
+      match(
+        Map.find_opt(next_miletone_id, project.milestones),
+        {
+          Some: (milestone) => milestone,
+          None: () => failwith("milestone not found")
+        }
+      );
+
+    let now = Tezos.get_now();
+    assert_with_error(
+      now > milestone.due_date,
+      "Milestone due date has not yet passed"
+    );
+
+  assert_with_error(
+    now < next_milestone.due_date,
+    "Next milestone due date has already passed"
+  );
+
+  let milestone_vote = match(Map.find_opt(param.milestone_id, project.votes),
+  {
+    Some: (vote) => vote,
+    None: () => failwith("vote not found")
+  });
+
+  assert_with_error(
+    milestone_vote.total_weight > (milestone.required_amount / (2 as nat)),
+    "Milstone abort has not been approved by the majority of investors"
+  );
+
+
+  for (const investor of project.investors) {
+
+  }
+
+
+
+    // assert_with_error(
+    //   vote
+
+    // )
+
+
+
+
+    return [list([]), new_storage]
+  };
   type post_project_param = {
     cid_metadata: string,
     milestones: list<TYPES.milestone>,
@@ -22,26 +91,27 @@ namespace Kicksmarter {
     );
     let old_start_date: timestamp = Tezos.get_now();
     let old_due_date: timestamp = old_start_date + 1;
-    for (const m of param.milestones) {
+    for (const milestone of param.milestones) {
       assert_with_error(
-        m.required_amount > (0 as tez),
+        milestone.required_amount > (0 as tez),
         "milestone requiredAmount must be positive"
       );
       assert_with_error(
-        m.start_date > old_start_date,
+        milestone.start_date > old_start_date,
         "milestone startDate must be in the future"
       );
       assert_with_error(
-        m.due_date > old_due_date,
+        milestone.due_date > old_due_date,
         "milestone dueDate must be in the future"
       );
       old_start_date = old_due_date + 1;
-      old_due_date = m.due_date
+      old_due_date = milestone.due_date
     };
     let milestones_map: map<nat, TYPES.milestone> = Map.empty;
-    for (const m of param.milestones) {
       let count = 0 as nat;
-      milestones_map = Map.update(count, Some(m), milestones_map)
+    for (const milestone of param.milestones) {
+      milestones_map = Map.update(count, Some(milestone), milestones_map)
+      count++;
     };
     const sender = Tezos.get_sender();
     const new_projet_id = storage.total_projects;
@@ -176,10 +246,10 @@ namespace Kicksmarter {
       };
     return [list([]), new_storage]
   };
-  type desaprove_milestone_param = { id: nat, milestone_id: nat };
+  type disapprove_milestone_param = { id: nat, milestone_id: nat };
   /* @entry */
-  const desaprove_milestone = (
-    param: desaprove_milestone_param,
+  const disapprove_milestone = (
+    param: disapprove_milestone_param,
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
     const project =

@@ -96,7 +96,7 @@ const KicksmarterProvider = ({
     let contract = await tezos!.wallet.at(contractAddress);
     let methods = contract.methods as unknown as TMethodsExternal;
 
-    await methods.desaprove_milestone(project_id, milestone_id).send();
+    await methods.disapprove_milestone(project_id, milestone_id).send();
   };
 
   const fundProject = async (

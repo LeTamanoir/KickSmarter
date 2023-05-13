@@ -36,7 +36,7 @@ type TStorageExternal = {
 };
 
 type TMethodsExternal = {
-  desaprove_milestone: (project_id: number, milestone_id: number) => any;
+  disapprove_milestone: (project_id: number, milestone_id: number) => any;
   fund_project: (project_id: number) => any;
   post_project: (
     cid_metadata: string,
