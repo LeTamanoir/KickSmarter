@@ -69,16 +69,20 @@ const Home = () => {
         Test fundProject
       </Button>
 
-      <Button
-        onClick={() => {
-          KickSmarter.pushMetadataToIPFS({
-            description: "Hello world 2",
-            title: "Hello world 1",
-          });
+      <input
+        type="file"
+        onChange={(e) => {
+          console.log(e.target.files);
+
+          if (!e.target.files) return;
+
+          let file = e.target.files[0];
+
+          console.log(file.type);
+
+          KickSmarter.pushImageToIPFS(file);
         }}
-      >
-        Test sendToIPFS
-      </Button>
+      />
     </div>
   );
 };

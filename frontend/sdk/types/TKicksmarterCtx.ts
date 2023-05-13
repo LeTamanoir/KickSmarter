@@ -29,10 +29,14 @@ type KicksmarterCtx = {
   pushMetadataToIPFS: ({
     title,
     description,
+    images,
   }: {
     title: string;
     description: string;
+    images: string[];
   }) => Promise<string>;
+
+  pushImageToIPFS: (image: File) => Promise<string>;
 };
 
 export default KicksmarterCtx;
