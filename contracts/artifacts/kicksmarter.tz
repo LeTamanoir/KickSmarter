@@ -1,80 +1,102 @@
 { parameter
-    (or (unit %clean)
+    (or (unit %fundProject)
         (pair %postProject
            (pair (timestamp %fundingDueDate) (string %metadata))
            (list %milestones
               (pair (pair (timestamp %dueDate) (string %metadata))
-                    (nat %requiredAmount)
+                    (mutez %requiredAmount)
                     (timestamp %startDate))))) ;
   storage
-    (pair (pair (big_map %investors
-                   address
-                   (pair (pair (nat %nbFakeInvestments) (nat %nbRealInvestments)) (nat %rating)))
+    (pair (pair (pair (big_map %addrToProjects address (list nat))
+                      (big_map %investors
+                         address
+                         (pair (pair (nat %nbFakeInvestments) (nat %nbRealInvestments)) (nat %rating))))
                 (big_map %projectMakers
                    address
-                   (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating))))
-          (big_map %projects
-             address
-             (list (pair (pair (pair (mutez %currentPrice) (timestamp %fundingDueDate))
-                               (timestamp %fundingStartDate)
-                               (map %investors address nat))
-                         (pair (string %metadata)
+                   (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating)))
+                (list %projects
+                   (pair (pair (pair (pair (mutez %currentPrice) (timestamp %fundingDueDate))
+                                     (timestamp %fundingStartDate)
+                                     (nat %id))
+                               (pair (map %investors address nat) (string %metadata))
                                (list %milestones
                                   (pair (pair (timestamp %dueDate) (string %metadata))
-                                        (nat %requiredAmount)
-                                        (timestamp %startDate))))
-                         (nat %targetPrice))))) ;
+                                        (mutez %requiredAmount)
+                                        (timestamp %startDate)))
+                               (address %owner))
+                         (mutez %targetPrice))))
+          (nat %totalProjects)) ;
   code { UNPAIR ;
          IF_LEFT
-           { DROP 2 ;
-             EMPTY_BIG_MAP
-               address
-               (list (pair (pair (pair mutez timestamp) timestamp (map address nat))
-                           (pair string (list (pair (pair timestamp string) nat timestamp)))
-                           nat)) ;
-             EMPTY_BIG_MAP address (pair (pair nat nat) nat) ;
-             EMPTY_BIG_MAP address (pair (pair nat nat) nat) ;
-             PAIR ;
-             PAIR }
+           { DROP }
            { SENDER ;
-             PUSH nat 0 ;
+             PUSH mutez 0 ;
              DUP 3 ;
              CDR ;
              ITER { CDR ; CAR ; ADD } ;
-             NIL (pair (pair timestamp string) nat timestamp) ;
+             DUP 2 ;
+             DUP 4 ;
+             CDR ;
+             PAIR ;
              DUP 4 ;
              CAR ;
              CDR ;
-             PAIR ;
-             PAIR ;
              EMPTY_MAP address nat ;
+             PAIR ;
+             PAIR ;
+             DUP 5 ;
+             CDR ;
              NOW ;
              PAIR ;
-             DIG 3 ;
+             DIG 4 ;
              CAR ;
              CAR ;
              PUSH mutez 0 ;
              PAIR ;
              PAIR ;
              PAIR ;
-             DUP 3 ;
+             PAIR ;
+             PUSH nat 1 ;
+             DUP 4 ;
              CDR ;
-             DUP 3 ;
-             GET ;
-             IF_NONE
-               { NIL (pair (pair (pair mutez timestamp) timestamp (map address nat))
-                           (pair string (list (pair (pair timestamp string) nat timestamp)))
-                           nat) }
-               {} ;
-             SWAP ;
+             ADD ;
+             DUP 4 ;
+             DUP 5 ;
+             CAR ;
+             DUP ;
+             CDR ;
+             DUP 7 ;
+             CAR ;
+             CDR ;
+             CDR ;
+             DIG 5 ;
              CONS ;
-             DUP 3 ;
-             DIG 3 ;
-             CDR ;
-             DIG 2 ;
+             UPDATE 2 ;
+             UPDATE 2 ;
+             UPDATE 1 ;
+             DUP ;
+             CAR ;
+             DUP ;
+             CAR ;
+             DUP 6 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             DUP 7 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             DUP 7 ;
+             GET ;
+             IF_NONE { NIL nat ; DIG 7 ; CDR } { DIG 7 ; CDR } ;
+             CONS ;
              SOME ;
-             DIG 3 ;
+             DIG 6 ;
              UPDATE ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             SWAP ;
              UPDATE 2 } ;
          NIL operation ;
          PAIR } }

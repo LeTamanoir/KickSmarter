@@ -1,47 +1,57 @@
 #import "./types.jsligo" "TYPES"
-#import "./params.jsligo" "PARAMS"
 namespace Kicksmarter {
+  type postProjectParam = {
+    metadata: string,
+    milestones: list<TYPES.milestone>,
+    fundingDueDate: timestamp
+  };
   /* @entry */
-  const postProject = (param: PARAMS.postProjectParam, storage: TYPES.storage)
+  const postProject = (param: postProjectParam, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     const sender = Tezos.get_sender();
-    let targetPrice: nat = 0 as nat;
+    let targetPrice: tez = 0 as tez;
     for (const m of param.milestones) {
       targetPrice += m.requiredAmount
     };
     let new_project: TYPES.project =
       {
+        id: storage.totalProjects,
+        owner: sender,
         metadata: param.metadata,
-        milestones: list([]),
+        milestones: param.milestones,
         targetPrice: targetPrice,
         currentPrice: 0 as tez,
         investors: Map.empty as map<address, nat>,
         fundingStartDate: Tezos.get_now(),
         fundingDueDate: param.fundingDueDate
       };
-    const newProjects =
+    const newAddrToProjects =
       match(
-        Big_map.find_opt(sender, storage.projects),
+        Big_map.find_opt(sender, storage.addrToProjects),
         {
-          Some: (projects) => list([new_project, ...projects]),
-          None: () => list([new_project])
+          Some: (projects) => list([storage.totalProjects, ...projects]),
+          None: () => list([storage.totalProjects])
         }
       );
+    const newTotalProjects: nat = storage.totalProjects + (1 as nat);
     const newStorage =
       {
         ...storage,
-        projects: Big_map.update(sender, Some(newProjects), storage.projects)
+        projects: list([new_project, ...storage.projects]),
+        addrToProjects: Big_map.update(
+          sender,
+          Some(newAddrToProjects),
+          storage.addrToProjects
+        ),
+        totalProjects: newTotalProjects
       };
     return [list([]), newStorage]
   };
+  type fundProjectParam = { i: unit };
   /* @entry */
-  const clean = (_: unit, _: TYPES.storage): [list<operation>, TYPES.storage] => {
-    const newStorage: TYPES.storage =
-      {
-        investors: Big_map.empty,
-        projectMakers: Big_map.empty,
-        projects: Big_map.empty
-      };
-    return [list([]), newStorage]
+  const fundProject = (_: fundProjectParam, storage: TYPES.storage)
+    : [list<operation>, TYPES.storage] => {
+    const _value: tez = Tezos.get_amount();
+    return [list([]), storage]
   }
 };

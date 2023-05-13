@@ -1,6 +1,0 @@
-#import "./types.jsligo" "TYPES"
-export type postProjectParam = {
-  metadata: string,
-  milestones: list<TYPES.milestone>,
-  fundingDueDate: timestamp
-};

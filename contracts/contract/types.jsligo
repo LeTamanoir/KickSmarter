@@ -12,15 +12,17 @@ export type projectMaker = {
 
 export type milestone = {
   metadata: string,
-  requiredAmount: nat,
+  requiredAmount: tez,
   startDate: timestamp,
   dueDate: timestamp
 };
 
 export type project = {
+  id: nat,
+  owner: address,
   metadata: string,
   milestones: list<milestone>,
-  targetPrice: nat,
+  targetPrice: tez,
   currentPrice: tez,
   investors: map<address, nat>,
   fundingStartDate: timestamp,
@@ -30,5 +32,7 @@ export type project = {
 export type storage = {
   investors: big_map<address, investor>,
   projectMakers: big_map<address, projectMaker>,
-  projects: big_map<address, list<project>>
+  projects: list<project>,
+  addrToProjects: big_map<address, list<nat>>,
+  totalProjects: nat
 };

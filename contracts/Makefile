@@ -3,7 +3,7 @@
 USERNAME		=	isma
 RPC_URL			=	https://ghostnet.tezos.marigold.dev/
 
-INITIAL_STORAGE	=	"(Pair (Pair {} {}) {})"
+INITIAL_STORAGE	=	"(Pair (Pair (Pair {} {}) {} {}) 0)"
 
 
 SRC 			=	./contract/kicksmarter.jsligo
