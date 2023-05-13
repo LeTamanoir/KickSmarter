@@ -3,6 +3,7 @@ import { useTezosContext } from "@/src/contexts/TezosContext";
 import { Button } from "@chakra-ui/react";
 
 import Navbar from '@/components/Navbar';
+import WelcomePage from "@/components/WelcomePage";
 
   const KickSmarter = useKickSmarter();
 
