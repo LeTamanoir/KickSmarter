@@ -1,112 +1,173 @@
 #import "./types.jsligo" "TYPES"
 namespace Kicksmarter {
-  type postProjectParam = {
+  type post_project_param = {
     metadata: string,
     milestones: list<TYPES.milestone>,
-    fundingDueDate: timestamp
+    funding_due_date: timestamp
   };
   /* @entry */
-  const postProject = (param: postProjectParam, storage: TYPES.storage)
+  const postProject = (param: post_project_param, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
-    const sender = Tezos.get_sender();
-    let targetAmount: tez = 0 as tez;
+    assert_with_error(
+      String.length(param.metadata) > (0 as nat),
+      "metadata must be non-empty"
+    );
+    assert_with_error(
+      List.length(param.milestones) > (0 as nat),
+      "milestones must be non-empty"
+    );
+    assert_with_error(
+      param.funding_due_date > Tezos.get_now(),
+      "fundingDueDate must be in the future"
+    );
+    let old_start_date: timestamp = Tezos.get_now();
+    let old_due_date: timestamp = old_start_date + 1;
     for (const m of param.milestones) {
-      targetAmount += m.requiredAmount
+      assert_with_error(
+        m.required_amount > (0 as tez),
+        "milestone requiredAmount must be positive"
+      );
+      assert_with_error(
+        m.start_date > old_start_date,
+        "milestone startDate must be in the future"
+      );
+      assert_with_error(
+        m.due_date > old_due_date,
+        "milestone dueDate must be in the future"
+      );
+      old_start_date = old_due_date + 1;
+      old_due_date = m.due_date
     };
-    let newProject: TYPES.project =
+    const sender = Tezos.get_sender();
+    const new_projet_id = storage.total_projects;
+    let target_amount: tez = 0 as tez;
+    for (const m of param.milestones) {
+      target_amount += m.required_amount
+    };
+    let new_project: TYPES.project =
       {
-        id: storage.totalProjects,
+        id: new_projet_id,
         owner: sender,
         metadata: param.metadata,
         milestones: param.milestones,
-        targetAmount: targetAmount,
-        currentAmount: 0 as tez,
-        investors: Map.empty as map<address, tez>,
-        fundingStartDate: Tezos.get_now(),
-        fundingDueDate: param.fundingDueDate
+        target_amount: target_amount,
+        current_amount: 0 as tez,
+        investors: Map.empty,
+        funding_start_date: Tezos.get_now(),
+        funding_due_date: param.funding_due_date
       };
-    const newAddrToProjects =
+    const new_addr_to_projects =
       match(
-        Big_map.find_opt(sender, storage.addrToProjects),
+        Big_map.find_opt(sender, storage.addr_to_projects),
         {
-          Some: (projects) => list([storage.totalProjects, ...projects]),
-          None: () => list([storage.totalProjects])
+          Some: (projects) => list([new_projet_id, ...projects]),
+          None: () => list([new_projet_id])
         }
       );
-    const newStorage =
+    const new_project_maker: TYPES.project_maker =
+      match(
+        Big_map.find_opt(sender, storage.project_makers),
+        {
+          Some: (maker) =>
+            {
+              nb_project_in_progress: maker.nb_project_in_progress + (1 as nat),
+              nb_total_projects: maker.nb_total_projects + (1 as nat)
+            },
+          None: () =>
+            { nb_project_in_progress: 0 as nat, nb_total_projects: 0 as nat }
+        }
+      );
+    const new_storage =
       {
         ...storage,
+        project_makers: Big_map.update(
+          sender,
+          Some(new_project_maker),
+          storage.project_makers
+        ),
         projects: Big_map.update(
-          storage.totalProjects,
-          Some(newProject),
+          new_projet_id,
+          Some(new_project),
           storage.projects
         ),
-        addrToProjects: Big_map.update(
+        addr_to_projects: Big_map.update(
           sender,
-          Some(newAddrToProjects),
-          storage.addrToProjects
+          Some(new_addr_to_projects),
+          storage.addr_to_projects
         ),
-        totalProjects: storage.totalProjects + (1 as nat)
+        total_projects: storage.total_projects + (1 as nat)
       };
-    return [list([]), newStorage]
+    return [list([]), new_storage]
   };
-  type fundProjectParam = { id: nat };
+  type fund_project_param = { id: nat };
   /* @entry */
-  const fundProject = (param: fundProjectParam, storage: TYPES.storage)
+  const fundProject = (param: fund_project_param, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
-    const value: tez = Tezos.get_amount();
+    const amount: tez = Tezos.get_amount();
     assert_with_error(
-      value > (0 as tez),
-      "You must send at least 1 mutez to fund a project."
+      amount > (0 as tez),
+      "sent amount must be at least 1 mutez"
     );
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
         {
           Some: (project) => project,
-          None: () => failwith("Project not found.")
+          None: () => failwith("project not found")
         }
       );
     assert_with_error(
-      Tezos.get_now() < project.fundingDueDate,
-      "Project funding period has ended."
+      Tezos.get_now() < project.funding_due_date,
+      "Project funding period has ended"
     );
     assert_with_error(
-      project.currentAmount + value <= project.targetAmount,
-      "Project is already fully funded."
+      project.current_amount + amount <= project.target_amount,
+      "Project is already fully funded"
     );
     const sender = Tezos.get_sender();
-    const newInvestors =
+    const new_project_investors =
       match(
         Map.find_opt(sender, project.investors),
         {
           Some: (amount) =>
-            Map.update(sender, Some(amount + value), project.investors),
-          None: () => Map.update(sender, Some(value), project.investors)
+            Map.update(sender, Some(amount + amount), project.investors),
+          None: () => Map.update(sender, Some(amount), project.investors)
         }
       );
-    const newProject =
+    const new_project =
       {
         ...project,
-        currentAmount: project.currentAmount + value,
-        investors: newInvestors
+        current_amount: project.current_amount + amount,
+        investors: new_project_investors
       };
-    const newStorage =
+    const new_investors =
+      match(
+        Big_map.find_opt(sender, storage.investors),
+        {
+          Some: (investor) =>
+            Big_map.update(
+              sender,
+              Some(
+                {
+                  total_invested_amount: investor.total_invested_amount + amount
+                }
+              ),
+              storage.investors
+            ),
+          None: () =>
+            Big_map.update(
+              sender,
+              Some({ total_invested_amount: amount }),
+              storage.investors
+            )
+        }
+      );
+    const new_storage =
       {
         ...storage,
-        projects: Big_map.update(param.id, Some(newProject), storage.projects),
-        investors: Big_map.update(
-          sender,
-          Some(
-            {
-              rating: 50 as nat,
-              nbFakeInvestments: 0 as nat,
-              nbRealInvestments: 0 as nat
-            }
-          ),
-          storage.investors
-        )
+        projects: Big_map.update(param.id, Some(new_project), storage.projects),
+        investors: new_investors
       };
-    return [list([]), newStorage]
+    return [list([]), new_storage]
   }
 };

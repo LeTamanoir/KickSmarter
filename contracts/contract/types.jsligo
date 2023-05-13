@@ -1,20 +1,15 @@
-export type investor = {
-  rating: nat,
-  nbFakeInvestments: nat,
-  nbRealInvestments: nat
-};
+export type investor = { total_invested_amount: tez };
 
-export type projectMaker = {
-  rating: nat,
-  nbFakeProjects: nat,
-  nbRealProjects: nat
+export type project_maker = {
+  nb_project_in_progress: nat,
+  nb_total_projects: nat
 };
 
 export type milestone = {
   metadata: string,
-  requiredAmount: tez,
-  startDate: timestamp,
-  dueDate: timestamp
+  required_amount: tez,
+  start_date: timestamp,
+  due_date: timestamp
 };
 
 export type project = {
@@ -22,17 +17,17 @@ export type project = {
   owner: address,
   metadata: string,
   milestones: list<milestone>,
-  targetAmount: tez,
-  currentAmount: tez,
+  target_amount: tez,
+  current_amount: tez,
   investors: map<address, tez>,
-  fundingStartDate: timestamp,
-  fundingDueDate: timestamp
+  funding_start_date: timestamp,
+  funding_due_date: timestamp
 };
 
 export type storage = {
   investors: big_map<address, investor>,
-  projectMakers: big_map<address, projectMaker>,
+  project_makers: big_map<address, project_maker>,
   projects: big_map<nat, project>,
-  addrToProjects: big_map<address, list<nat>>,
-  totalProjects: nat
+  addr_to_projects: big_map<address, list<nat>>,
+  total_projects: nat
 };
