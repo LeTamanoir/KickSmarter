@@ -25,6 +25,14 @@ type KicksmarterCtx = {
   }) => Promise<void>;
 
   fundProject: (project_id: number, amount: number) => Promise<void>;
+
+  pushMetadataToIPFS: ({
+    title,
+    description,
+  }: {
+    title: string;
+    description: string;
+  }) => Promise<string>;
 };
 
 export default KicksmarterCtx;

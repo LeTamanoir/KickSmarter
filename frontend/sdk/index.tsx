@@ -5,6 +5,7 @@ import { useTezosContext } from "@/src/contexts/TezosContext";
 import { TMethodsExternal } from "./types/TExternal";
 import { _getProject, _getStorage } from "./utils";
 import TMilestone from "./types/TMilestone";
+import { PINATA_PUBLIC_GATEWAY_URL } from "@/src/constants";
 
 const KicksmarterCtx = createContext<TKicksmarterCtx>({} as TKicksmarterCtx);
 const useKickSmarter = () => useContext(KicksmarterCtx);
@@ -17,6 +18,31 @@ const KicksmarterProvider = ({
   children: React.ReactNode;
 }) => {
   const { tezos, connected } = useTezosContext();
+
+  const pushMetadataToIPFS = async ({
+    title,
+    description,
+  }: {
+    title: string;
+    description: string;
+  }): Promise<string> => {
+    let payload = JSON.stringify({
+      pinataOptions: { cidVersion: 1 },
+      pinataContent: { title, description },
+    });
+
+    const res = await fetch("/api/ipfs", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: payload,
+    });
+
+    const data = await res.json();
+
+    return data.ipfsHash;
+  };
 
   const getProject = async (project_id: number): Promise<TProject> => {
     let storage = await _getStorage(tezos!, contractAddress);
@@ -90,6 +116,7 @@ const KicksmarterProvider = ({
   return (
     <KicksmarterCtx.Provider
       value={{
+        pushMetadataToIPFS,
         getProjects,
         getProject,
         postProject,

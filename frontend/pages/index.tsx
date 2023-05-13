@@ -68,6 +68,17 @@ const Home = () => {
       >
         Test fundProject
       </Button>
+
+      <Button
+        onClick={() => {
+          KickSmarter.pushMetadataToIPFS({
+            description: "Hello world 2",
+            title: "Hello world 1",
+          });
+        }}
+      >
+        Test sendToIPFS
+      </Button>
     </div>
   );
 };
