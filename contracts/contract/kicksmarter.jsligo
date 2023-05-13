@@ -52,9 +52,61 @@ namespace Kicksmarter {
   };
   type fundProjectParam = { id: nat };
   /* @entry */
-  const fundProject = (_: fundProjectParam, storage: TYPES.storage)
+  const fundProject = (param: fundProjectParam, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
-    const _value: tez = Tezos.get_amount();
-    return [list([]), storage]
+    const value: tez = Tezos.get_amount();
+    assert_with_error(
+      value > (0 as tez),
+      "You must send at least 1 mutez to fund a project."
+    );
+    const project =
+      match(
+        Big_map.find_opt(param.id, storage.projects),
+        {
+          Some: (project) => project,
+          None: () => failwith("Project not found.")
+        }
+      );
+    assert_with_error(
+      Tezos.get_now() < project.fundingDueDate,
+      "Project funding period has ended."
+    );
+    assert_with_error(
+      project.currentPrice + value <= project.targetPrice,
+      "Project is already fully funded."
+    );
+    const sender = Tezos.get_sender();
+    const newInvestors =
+      match(
+        Map.find_opt(sender, project.investors),
+        {
+          Some: (amount) =>
+            Map.update(sender, Some(amount + value), project.investors),
+          None: () => Map.update(sender, Some(value), project.investors)
+        }
+      );
+    const newProject =
+      {
+        ...project,
+        currentPrice: project.currentPrice + value,
+        investors: newInvestors
+      };
+    const newStorage =
+      {
+        ...storage,
+        projects: Big_map.update(param.id, Some(newProject), storage.projects),
+        investors: Big_map.update(
+          sender,
+          Some(
+            {
+              rating: 50 as nat,
+              nbFakeInvestments: 0 as nat,
+              nbRealInvestments: 0 as nat
+            }
+          ),
+          storage.investors
+        )
+      };
+    return [list([]), newStorage]
   }
 };
