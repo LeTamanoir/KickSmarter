@@ -2,9 +2,7 @@ import { useKickSmarter } from "@/sdk";
 import { useTezosContext } from "@/src/contexts/TezosContext";
 import { Button } from "@chakra-ui/react";
 
-const Home = () => {
-  const { wallet, tezos, connectWallet, disconnectWallet, connected } =
-    useTezosContext();
+import Navbar from '@/components/Navbar';
 
   const KickSmarter = useKickSmarter();
 
