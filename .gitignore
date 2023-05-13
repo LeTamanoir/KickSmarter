@@ -1,1 +1,5 @@
 .ligo
+.idea
+frontend/node_modules
+frontend/.next
+frontend/yarn.lock
