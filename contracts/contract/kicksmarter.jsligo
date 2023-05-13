@@ -222,7 +222,11 @@ namespace Kicksmarter {
                           total_weight: vote.total_weight + weight,
                           voters: Set.add(sender, vote.voters)
                         },
-                      None: () => failwith("sender has not voted yet")
+                      None: () =>
+                        {
+                          total_weight: weight,
+                          voters: Set.literal(list([sender]))
+                        }
                     }
                   )
                 ),

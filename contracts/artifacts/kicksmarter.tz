@@ -78,7 +78,7 @@
                  CDR ;
                  GET ;
                  IF_NONE
-                   { DIG 7 ; DIG 8 ; DROP 2 ; PUSH string "sender has not voted yet" ; FAILWITH }
+                   { EMPTY_SET address ; DIG 9 ; PUSH bool True ; SWAP ; UPDATE ; DIG 8 }
                    { DUP ;
                      CDR ;
                      DIG 10 ;
@@ -88,8 +88,8 @@
                      DIG 9 ;
                      DIG 2 ;
                      CAR ;
-                     ADD ;
-                     PAIR } ;
+                     ADD } ;
+                 PAIR ;
                  SOME ;
                  DUP 9 ;
                  CDR ;

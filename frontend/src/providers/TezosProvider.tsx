@@ -6,11 +6,11 @@ import { BeaconWallet } from "@taquito/beacon-wallet";
 import { NetworkType, DAppClientOptions } from "@airgap/beacon-dapp";
 
 const walletOptions: DAppClientOptions = {
-  name: "KickSmarter",
+  name: "KickSmarter DApp",
   preferredNetwork: NetworkType.GHOSTNET,
 };
 
-const TezosProvider = ({ children }: { children: JSX.Element }) => {
+const TezosProvider = ({ children }: { children: React.ReactNode }) => {
   const [tezos, setTezos] = useState<TezosToolkit | undefined>(undefined);
   const [wallet, setWallet] = useState<{ wallet: BeaconWallet | undefined }>({
     wallet: undefined,

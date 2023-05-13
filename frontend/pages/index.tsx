@@ -1,22 +1,12 @@
-import { CONTRACT_ADDRESS } from "@/src/constants";
+import { useKickSmarter } from "@/sdk";
 import { useTezosContext } from "@/src/contexts/TezosContext";
 import { Button } from "@chakra-ui/react";
-import { useEffect } from "react";
 
 const Home = () => {
   const { wallet, tezos, connectWallet, disconnectWallet, connected } =
     useTezosContext();
 
-  useEffect(() => {
-    if (!connected) return;
-
-    tezos!.contract
-      .at(CONTRACT_ADDRESS)
-      .then((contract) => contract.storage())
-      .then((storage) => {
-        console.log(storage);
-      });
-  }, [connected]);
+  const KickSmarter = useKickSmarter();
 
   return (
     <div>
@@ -26,6 +16,58 @@ const Home = () => {
 
       <Button onClick={() => connectWallet()}>Connect wallet</Button>
       <Button onClick={() => disconnectWallet()}>Disconnect wallet</Button>
+
+      <Button
+        onClick={() => {
+          KickSmarter.getProjects().then(console.log);
+        }}
+      >
+        Test getProjects
+      </Button>
+      <Button
+        onClick={() => {
+          KickSmarter.getProject(1).then(console.log);
+        }}
+      >
+        Test getProject
+      </Button>
+      <Button
+        onClick={() => {
+          KickSmarter.postProject({
+            cid_metadata: "cid_metadata",
+            milestones: [
+              {
+                cid_metadata: "cid_metadata",
+                due_date: new Date(Date.now() + 1000 * 60 * 60 * 20),
+                start_date: new Date(Date.now() + 1000 * 60 * 60 * 10),
+                required_amount: 200,
+              },
+            ],
+            funding_due_date: new Date(Date.now() + 1000 * 60 * 60 * 8),
+          });
+        }}
+      >
+        Test postProject
+      </Button>
+
+      <Button
+        onClick={() => {
+          KickSmarter.vote({
+            project_id: 1,
+            milestone_id: 0,
+          });
+        }}
+      >
+        Test vote
+      </Button>
+
+      <Button
+        onClick={() => {
+          KickSmarter.fundProject(1, 0.00001);
+        }}
+      >
+        Test fundProject
+      </Button>
     </div>
   );
 };

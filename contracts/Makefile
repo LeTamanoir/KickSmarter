@@ -1,6 +1,6 @@
 ## MAKEFILE ##
 
-USERNAME		=	isma
+USERNAME		=	LeTamanoirDev
 RPC_URL			=	https://ghostnet.tezos.marigold.dev/
 
 INITIAL_STORAGE	=	"(Pair (Pair (Pair {} {}) {} {}) 0)"
