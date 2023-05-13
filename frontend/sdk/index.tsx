@@ -2,7 +2,6 @@ import { createContext, useContext } from "react";
 import TKicksmarterCtx from "./types/TKicksmarterCtx";
 import TProject from "./types/TProject";
 import { useTezosContext } from "@/src/contexts/TezosContext";
-import { TMethodsExternal } from "./types/TExternal";
 import {
   _getMethods,
   _getProject,
@@ -118,9 +117,20 @@ const KicksmarterProvider = ({
     await methods.abort_project(project_id, milestone_id).send();
   };
 
+  const abortProjectFunding = async (project_id: number): Promise<void> => {
+    if (!connected) {
+      throw new Error("Not connected");
+    }
+
+    let methods = await _getMethods(tezos!, contractAddress);
+
+    await methods.abort_project_funding(project_id).send();
+  };
+
   return (
     <KicksmarterCtx.Provider
       value={{
+        abortProjectFunding,
         claimMilestone,
         abortProject,
         pushMetadataToIPFS,

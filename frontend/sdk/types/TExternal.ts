@@ -47,6 +47,7 @@ type TMethodsExternal = {
   ) => any;
   claim_milestone: (project_id: number, milestone_id: number) => any;
   abort_project: (project_id: number, milestone_id: number) => any;
+  abort_project_funding: (project_id: number) => any;
 };
 
 export type { TProjectExternal, TStorageExternal, TMethodsExternal };

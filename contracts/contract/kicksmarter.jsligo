@@ -1,10 +1,66 @@
 #import "./types.jsligo" "TYPES"
 namespace Kicksmarter {
   /* @entry */
+  const abort_project_funding = (param: { id: nat }, storage: TYPES.storage)
+    : [list<operation>, TYPES.storage] => {
+    const sender = Tezos.get_sender();
+    const project =
+      match(
+        Big_map.find_opt(param.id, storage.projects),
+        {
+          Some: (project) => project,
+          None: () => failwith("project not found")
+        }
+      );
+    assert_with_error(
+      project.owner == sender,
+      "only project owner can abort funding"
+    );
+    assert_with_error(
+      project.status == FUNDING(),
+      "project is not in funding state"
+    );
+    let remaining_funds = 0 as tez;
+    for (const milestone_elem of project.milestones) {
+      let [_, milestone] = milestone_elem;
+      remaining_funds += milestone.required_amount
+    };
+    let refund_operations: list<operation> = list([]);
+    for (const investor of project.investors) {
+      let [address, investment] = investor;
+      match(
+        (Tezos.get_contract_opt(address) as option<contract<unit>>),
+        {
+          Some: (receiver: contract<unit>) => {
+            refund_operations =
+              list(
+                [
+                  Tezos.transaction(unit, investment, receiver),
+                  ...refund_operations
+                ]
+              )
+          },
+          None: () => unit
+        }
+      )
+    };
+    let new_storage =
+      {
+        ...storage,
+        projects: Big_map.update(
+          param.id,
+          Some({ ...project, status: ABORTED() }),
+          storage.projects
+        )
+      };
+    return [refund_operations, new_storage]
+  };
+  /* @entry */
   const abort_project = (
     param: { id: nat, milestone_id: nat },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
+    const sender = Tezos.get_sender();
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -16,6 +72,10 @@ namespace Kicksmarter {
     assert_with_error(
       project.status != ABORTED(),
       "project has already been aborted"
+    );
+    match(
+      Map.find_opt(sender, project.investors),
+      { Some: (_) => unit, None: () => failwith("sender is not an investor") }
     );
     let milestone =
       match(
@@ -65,15 +125,13 @@ namespace Kicksmarter {
         (Tezos.get_contract_opt(address) as option<contract<unit>>),
         {
           Some: (receiver: contract<unit>) => {
-            if (List.length(refund_operations) > (0 as nat)) {
-              refund_operations =
-                list(
-                  [
-                    Tezos.transaction(unit, interest, receiver),
-                    ...refund_operations
-                  ]
-                )
-            }
+            refund_operations =
+              list(
+                [
+                  Tezos.transaction(unit, interest, receiver),
+                  ...refund_operations
+                ]
+              )
           },
           None: () => unit
         }
