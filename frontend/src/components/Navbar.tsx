@@ -4,7 +4,7 @@ import Connection from './buttons/Connection';
 const Navbar = () => {
     return (
         <>
-            <HStack w="100%" justify="space-between" px="4%" py="0.5%" borderBottom="1px" borderBottomColor="#E8E8E8">
+            <HStack w="100%" justify="space-between" px="4%" py="0.6%" borderBottom="1px" borderBottomColor="#E8E8E8">
                 <Link href="/">
                     <Image h="40px" src="/assets/logo.png" />
                 </Link>
