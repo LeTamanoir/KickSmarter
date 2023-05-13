@@ -1,110 +1,331 @@
 { parameter
-    (or (nat %fundProject)
-        (pair %postProject
-           (pair (timestamp %fundingDueDate) (string %metadata))
+    (or (or (pair %desaprove_milestone (nat %id) (nat %milestone_id)) (nat %fund_project))
+        (pair %post_project
+           (pair (string %cid_metadata) (timestamp %funding_due_date))
            (list %milestones
-              (pair (pair (timestamp %dueDate) (string %metadata))
-                    (mutez %requiredAmount)
-                    (timestamp %startDate))))) ;
+              (pair (pair (string %cid_metadata) (timestamp %due_date))
+                    (mutez %required_amount)
+                    (timestamp %start_date))))) ;
   storage
-    (pair (pair (pair (big_map %addrToProjects address (list nat))
-                      (big_map %investors
-                         address
-                         (pair (pair (nat %nbFakeInvestments) (nat %nbRealInvestments)) (nat %rating))))
-                (big_map %projectMakers
+    (pair (pair (pair (big_map %addr_to_projects address (list nat))
+                      (big_map %investors address mutez))
+                (big_map %project_makers
                    address
-                   (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating)))
+                   (pair (nat %nb_project_in_progress) (nat %nb_total_projects)))
                 (big_map %projects
                    nat
-                   (pair (pair (pair (pair (mutez %currentAmount) (timestamp %fundingDueDate))
-                                     (timestamp %fundingStartDate)
-                                     (nat %id))
-                               (pair (map %investors address mutez) (string %metadata))
-                               (list %milestones
-                                  (pair (pair (timestamp %dueDate) (string %metadata))
-                                        (mutez %requiredAmount)
-                                        (timestamp %startDate)))
+                   (pair (pair (pair (pair (string %cid_metadata) (mutez %current_amount))
+                                     (timestamp %funding_due_date)
+                                     (timestamp %funding_start_date))
+                               (pair (nat %id) (map %investors address mutez))
+                               (map %milestones
+                                  nat
+                                  (pair (pair (string %cid_metadata) (timestamp %due_date))
+                                        (mutez %required_amount)
+                                        (timestamp %start_date)))
                                (address %owner))
-                         (mutez %targetAmount))))
-          (nat %totalProjects)) ;
+                         (mutez %target_amount)
+                         (map %votes nat (pair (mutez %total_weight) (set %voters address))))))
+          (nat %total_projects)) ;
   code { UNPAIR ;
          IF_LEFT
-           { AMOUNT ;
-             PUSH mutez 0 ;
-             DUP 2 ;
-             COMPARE ;
-             GT ;
-             IF {}
-                { PUSH string "You must send at least 1 mutez to fund a project." ; FAILWITH } ;
-             DUP 3 ;
-             CAR ;
-             CDR ;
-             CDR ;
-             DUP 3 ;
-             GET ;
-             IF_NONE { PUSH string "Project not found." ; FAILWITH } {} ;
-             PUSH string "Project funding period has ended." ;
-             DUP 2 ;
-             CAR ;
-             CAR ;
-             CAR ;
-             CDR ;
-             NOW ;
-             COMPARE ;
-             LT ;
-             IF { DROP } { FAILWITH } ;
-             PUSH string "Project is already fully funded." ;
-             DUP 2 ;
-             CDR ;
-             DUP 4 ;
-             DUP 4 ;
-             CAR ;
-             CAR ;
-             CAR ;
-             CAR ;
-             ADD ;
-             COMPARE ;
-             LE ;
-             IF { DROP } { FAILWITH } ;
-             SENDER ;
-             DUP 2 ;
-             CAR ;
-             CDR ;
-             CAR ;
-             CAR ;
-             DUP 2 ;
-             GET ;
-             IF_NONE
-               { DUP 2 ; CAR ; CDR ; CAR ; CAR ; DUP 4 ; SOME ; DUP 3 ; UPDATE }
-               { DUP 3 ;
+           { IF_LEFT
+               { DUP 2 ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DUP 2 ;
+                 CAR ;
+                 GET ;
+                 IF_NONE { PUSH string "project not found" ; FAILWITH } {} ;
+                 DUP ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 CAR ;
+                 DUP 3 ;
+                 CDR ;
+                 GET ;
+                 IF_NONE { PUSH string "milestone not found" ; FAILWITH } { DROP } ;
+                 SENDER ;
+                 DUP 2 ;
                  CAR ;
                  CDR ;
                  CAR ;
-                 CAR ;
+                 CDR ;
+                 DUP 2 ;
+                 GET ;
+                 IF_NONE { PUSH string "sender has not voted yet" ; FAILWITH } {} ;
                  DUP 5 ;
-                 DIG 2 ;
-                 ADD ;
+                 DUP 6 ;
+                 CAR ;
+                 DUP ;
+                 CDR ;
+                 DIG 7 ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DUP 7 ;
+                 DUP 8 ;
+                 CDR ;
+                 DUP 9 ;
+                 CDR ;
+                 CDR ;
+                 DIG 9 ;
+                 CDR ;
+                 CDR ;
+                 DUP 11 ;
+                 CDR ;
+                 GET ;
+                 IF_NONE
+                   { DIG 7 ; DIG 8 ; DROP 2 ; PUSH string "sender has not voted yet" ; FAILWITH }
+                   { DUP ;
+                     CDR ;
+                     DIG 10 ;
+                     PUSH bool True ;
+                     SWAP ;
+                     UPDATE ;
+                     DIG 9 ;
+                     DIG 2 ;
+                     CAR ;
+                     ADD ;
+                     PAIR } ;
                  SOME ;
+                 DUP 9 ;
+                 CDR ;
+                 UPDATE ;
+                 UPDATE 2 ;
+                 UPDATE 2 ;
+                 SOME ;
+                 DIG 5 ;
+                 CAR ;
+                 UPDATE ;
+                 UPDATE 2 ;
+                 UPDATE 2 ;
+                 UPDATE 1 }
+               { AMOUNT ;
+                 PUSH mutez 0 ;
+                 DUP 2 ;
+                 COMPARE ;
+                 GT ;
+                 IF {} { PUSH string "sent amount must be at least 1 mutez" ; FAILWITH } ;
                  DUP 3 ;
-                 UPDATE } ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DUP 3 ;
+                 GET ;
+                 IF_NONE { PUSH string "project not found" ; FAILWITH } {} ;
+                 PUSH string "Project funding period has ended" ;
+                 DUP 2 ;
+                 CAR ;
+                 CAR ;
+                 CDR ;
+                 CAR ;
+                 NOW ;
+                 COMPARE ;
+                 LT ;
+                 IF { DROP } { FAILWITH } ;
+                 PUSH string "Project is already fully funded" ;
+                 DUP 2 ;
+                 CDR ;
+                 CAR ;
+                 DUP 4 ;
+                 DUP 4 ;
+                 CAR ;
+                 CAR ;
+                 CAR ;
+                 CDR ;
+                 ADD ;
+                 COMPARE ;
+                 LE ;
+                 IF { DROP } { FAILWITH } ;
+                 SENDER ;
+                 DUP 2 ;
+                 CAR ;
+                 CDR ;
+                 CAR ;
+                 CDR ;
+                 DUP 2 ;
+                 GET ;
+                 IF_NONE
+                   { DUP 2 ; CAR ; CDR ; CAR ; CDR ; DUP 4 ; SOME ; DUP 3 ; UPDATE }
+                   { DUP 3 ;
+                     CAR ;
+                     CDR ;
+                     CAR ;
+                     CDR ;
+                     DUP 2 ;
+                     DIG 2 ;
+                     ADD ;
+                     SOME ;
+                     DUP 3 ;
+                     UPDATE } ;
+                 DUP 3 ;
+                 DUP 4 ;
+                 CAR ;
+                 DUP ;
+                 CAR ;
+                 DUP ;
+                 CAR ;
+                 DUP 8 ;
+                 DIG 7 ;
+                 CAR ;
+                 CAR ;
+                 CAR ;
+                 CDR ;
+                 ADD ;
+                 UPDATE 2 ;
+                 UPDATE 1 ;
+                 UPDATE 1 ;
+                 UPDATE 1 ;
+                 DUP 6 ;
+                 CAR ;
+                 CAR ;
+                 CDR ;
+                 DUP 4 ;
+                 GET ;
+                 IF_NONE
+                   { DUP 6 ; CAR ; CAR ; CDR ; DIG 4 ; SOME ; DIG 4 ; UPDATE }
+                   { DUP 7 ; CAR ; CAR ; CDR ; DIG 5 ; DIG 2 ; ADD ; SOME ; DIG 4 ; UPDATE } ;
+                 DUP 5 ;
+                 DUP 6 ;
+                 CAR ;
+                 DUP ;
+                 CDR ;
+                 DIG 7 ;
+                 CAR ;
+                 CDR ;
+                 CDR ;
+                 DUP 6 ;
+                 DIG 6 ;
+                 CAR ;
+                 DUP ;
+                 CDR ;
+                 DUP ;
+                 CAR ;
+                 DIG 9 ;
+                 UPDATE 2 ;
+                 UPDATE 1 ;
+                 UPDATE 2 ;
+                 UPDATE 1 ;
+                 SOME ;
+                 DIG 6 ;
+                 UPDATE ;
+                 UPDATE 2 ;
+                 UPDATE 2 ;
+                 UPDATE 1 ;
+                 DUP ;
+                 CAR ;
+                 DUP ;
+                 CAR ;
+                 DIG 3 ;
+                 UPDATE 2 ;
+                 UPDATE 1 ;
+                 UPDATE 1 } }
+           { PUSH nat 0 ;
+             DUP 2 ;
+             CAR ;
+             CAR ;
+             SIZE ;
+             COMPARE ;
+             GT ;
+             IF {} { PUSH string "metadata must be non-empty" ; FAILWITH } ;
+             PUSH nat 0 ;
+             DUP 2 ;
+             CDR ;
+             SIZE ;
+             COMPARE ;
+             GT ;
+             IF {} { PUSH string "milestones must be non-empty" ; FAILWITH } ;
+             PUSH string "fundingDueDate must be in the future" ;
+             NOW ;
              DUP 3 ;
+             CAR ;
+             CDR ;
+             COMPARE ;
+             GT ;
+             IF { DROP } { FAILWITH } ;
+             NOW ;
+             PUSH int 1 ;
+             DUP 2 ;
+             ADD ;
+             DUP 3 ;
+             CDR ;
+             ITER { PUSH mutez 0 ;
+                    DUP 2 ;
+                    CDR ;
+                    CAR ;
+                    COMPARE ;
+                    GT ;
+                    IF {} { PUSH string "milestone requiredAmount must be positive" ; FAILWITH } ;
+                    PUSH string "milestone startDate must be in the future" ;
+                    DIG 3 ;
+                    DUP 3 ;
+                    CDR ;
+                    CDR ;
+                    COMPARE ;
+                    GT ;
+                    IF { DROP } { FAILWITH } ;
+                    PUSH string "milestone dueDate must be in the future" ;
+                    DUP 3 ;
+                    DUP 3 ;
+                    CAR ;
+                    CDR ;
+                    COMPARE ;
+                    GT ;
+                    IF { DROP } { FAILWITH } ;
+                    PUSH int 1 ;
+                    DIG 2 ;
+                    ADD ;
+                    SWAP ;
+                    CAR ;
+                    CDR } ;
+             DROP 2 ;
+             EMPTY_MAP nat (pair (pair string timestamp) mutez timestamp) ;
+             DUP 2 ;
+             CDR ;
+             ITER { SOME ; PUSH nat 0 ; UPDATE } ;
+             SENDER ;
+             DUP 4 ;
+             CDR ;
+             PUSH mutez 0 ;
+             DUP 5 ;
+             CDR ;
+             ITER { CDR ; CAR ; ADD } ;
+             EMPTY_MAP nat (pair mutez (set address)) ;
+             SWAP ;
+             PAIR ;
+             DUP 3 ;
+             DIG 4 ;
+             PAIR ;
+             EMPTY_MAP address mutez ;
+             DUP 4 ;
+             PAIR ;
+             PAIR ;
+             NOW ;
+             DUP 6 ;
+             CAR ;
+             CDR ;
+             PAIR ;
+             PUSH mutez 0 ;
+             DIG 6 ;
+             CAR ;
+             CAR ;
+             PAIR ;
+             PAIR ;
+             PAIR ;
+             PAIR ;
              DUP 4 ;
              CAR ;
-             DUP ;
+             CDR ;
              CAR ;
-             DUP ;
-             CAR ;
-             DIG 7 ;
-             DIG 7 ;
-             CAR ;
-             CAR ;
-             CAR ;
-             CAR ;
-             ADD ;
-             UPDATE 1 ;
-             UPDATE 1 ;
-             UPDATE 1 ;
-             UPDATE 1 ;
+             DUP 4 ;
+             GET ;
+             IF_NONE
+               { PUSH nat 0 ; PUSH nat 0 }
+               { PUSH nat 1 ; DUP 2 ; CDR ; ADD ; PUSH nat 1 ; DIG 2 ; CAR ; ADD } ;
+             PAIR ;
              DUP 5 ;
              DUP 6 ;
              CAR ;
@@ -113,84 +334,25 @@
              DUP 8 ;
              CAR ;
              CDR ;
-             CDR ;
-             DUP 5 ;
-             DIG 5 ;
              CAR ;
-             DUP ;
-             CDR ;
-             DUP ;
-             CAR ;
-             DIG 8 ;
-             UPDATE 1 ;
-             UPDATE 1 ;
-             UPDATE 2 ;
-             UPDATE 1 ;
+             DIG 4 ;
              SOME ;
-             DIG 6 ;
+             DUP 8 ;
              UPDATE ;
-             UPDATE 2 ;
+             UPDATE 1 ;
              UPDATE 2 ;
              UPDATE 1 ;
              DUP ;
              CAR ;
              DUP ;
-             CAR ;
-             DIG 4 ;
-             CAR ;
-             CAR ;
              CDR ;
-             PUSH nat 50 ;
-             PUSH nat 0 ;
-             PUSH nat 0 ;
-             PAIR ;
-             PAIR ;
-             SOME ;
-             DIG 5 ;
-             UPDATE ;
-             UPDATE 2 ;
-             UPDATE 1 ;
-             UPDATE 1 }
-           { SENDER ;
-             PUSH mutez 0 ;
-             DUP 3 ;
-             CDR ;
-             ITER { CDR ; CAR ; ADD } ;
-             DUP 2 ;
-             DUP 4 ;
-             CDR ;
-             PAIR ;
-             DUP 4 ;
-             CAR ;
-             CDR ;
-             EMPTY_MAP address mutez ;
-             PAIR ;
-             PAIR ;
-             DUP 5 ;
-             CDR ;
-             NOW ;
-             PAIR ;
-             DIG 4 ;
-             CAR ;
-             CAR ;
-             PUSH mutez 0 ;
-             PAIR ;
-             PAIR ;
-             PAIR ;
-             PAIR ;
-             DUP 3 ;
-             DUP 4 ;
-             CAR ;
-             DUP ;
-             CDR ;
-             DUP 6 ;
-             CAR ;
-             CDR ;
-             CDR ;
-             DIG 4 ;
-             SOME ;
              DUP 7 ;
+             CAR ;
              CDR ;
+             CDR ;
+             DIG 4 ;
+             SOME ;
+             DUP 6 ;
              UPDATE ;
              UPDATE 2 ;
              UPDATE 2 ;
@@ -199,17 +361,18 @@
              CAR ;
              DUP ;
              CAR ;
-             DUP 5 ;
-             CAR ;
-             CAR ;
-             CAR ;
              DUP 6 ;
              CAR ;
              CAR ;
              CAR ;
-             DUP 6 ;
+             DUP 7 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             DUP 7 ;
              GET ;
-             IF_NONE { NIL nat ; DUP 7 ; CDR } { DUP 7 ; CDR } ;
+             IF_NONE { NIL nat } {} ;
+             DIG 5 ;
              CONS ;
              SOME ;
              DIG 5 ;

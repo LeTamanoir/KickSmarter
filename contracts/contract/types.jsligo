@@ -6,17 +6,20 @@ export type project_maker = {
 };
 
 export type milestone = {
-  metadata: string,
+  cid_metadata: string,
   required_amount: tez,
   start_date: timestamp,
   due_date: timestamp
 };
 
+export type vote = { voters: set<address>, total_weight: tez };
+
 export type project = {
   id: nat,
   owner: address,
-  metadata: string,
-  milestones: list<milestone>,
+  cid_metadata: string,
+  milestones: map<nat, milestone>,
+  votes: map<nat, vote>,
   target_amount: tez,
   current_amount: tez,
   investors: map<address, tez>,

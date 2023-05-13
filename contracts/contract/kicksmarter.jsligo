@@ -1,15 +1,15 @@
 #import "./types.jsligo" "TYPES"
 namespace Kicksmarter {
   type post_project_param = {
-    metadata: string,
+    cid_metadata: string,
     milestones: list<TYPES.milestone>,
     funding_due_date: timestamp
   };
   /* @entry */
-  const postProject = (param: post_project_param, storage: TYPES.storage)
+  const post_project = (param: post_project_param, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     assert_with_error(
-      String.length(param.metadata) > (0 as nat),
+      String.length(param.cid_metadata) > (0 as nat),
       "metadata must be non-empty"
     );
     assert_with_error(
@@ -38,6 +38,11 @@ namespace Kicksmarter {
       old_start_date = old_due_date + 1;
       old_due_date = m.due_date
     };
+    let milestones_map: map<nat, TYPES.milestone> = Map.empty;
+    for (const m of param.milestones) {
+      let count = 0 as nat;
+      milestones_map = Map.update(count, Some(m), milestones_map)
+    };
     const sender = Tezos.get_sender();
     const new_projet_id = storage.total_projects;
     let target_amount: tez = 0 as tez;
@@ -48,8 +53,9 @@ namespace Kicksmarter {
       {
         id: new_projet_id,
         owner: sender,
-        metadata: param.metadata,
-        milestones: param.milestones,
+        cid_metadata: param.cid_metadata,
+        milestones: milestones_map,
+        votes: Map.empty,
         target_amount: target_amount,
         current_amount: 0 as tez,
         investors: Map.empty,
@@ -101,7 +107,7 @@ namespace Kicksmarter {
   };
   type fund_project_param = { id: nat };
   /* @entry */
-  const fundProject = (param: fund_project_param, storage: TYPES.storage)
+  const fund_project = (param: fund_project_param, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     const amount: tez = Tezos.get_amount();
     assert_with_error(
@@ -167,6 +173,65 @@ namespace Kicksmarter {
         ...storage,
         projects: Big_map.update(param.id, Some(new_project), storage.projects),
         investors: new_investors
+      };
+    return [list([]), new_storage]
+  };
+  type desaprove_milestone_param = { id: nat, milestone_id: nat };
+  /* @entry */
+  const desaprove_milestone = (
+    param: desaprove_milestone_param,
+    storage: TYPES.storage
+  ): [list<operation>, TYPES.storage] => {
+    const project =
+      match(
+        Big_map.find_opt(param.id, storage.projects),
+        {
+          Some: (project) => project,
+          None: () => failwith("project not found")
+        }
+      );
+    match(
+      Map.find_opt(param.milestone_id, project.milestones),
+      { Some: (_) => unit, None: () => failwith("milestone not found") }
+    );
+    const sender = Tezos.get_sender();
+    const weight =
+      match(
+        Map.find_opt(sender, project.investors),
+        {
+          Some: (weight) => weight,
+          None: () => failwith("sender has not voted yet")
+        }
+      );
+    const new_storage =
+      {
+        ...storage,
+        projects: Big_map.update(
+          param.id,
+          Some(
+            {
+              ...project,
+              votes: Map.update(
+                param.milestone_id,
+                Some(
+                  match(
+                    Map.find_opt(param.milestone_id, project.votes),
+                    {
+                      Some: (vote) =>
+                        {
+                          total_weight: vote.total_weight + weight,
+                          voters: Set.add(sender, vote.voters)
+                        },
+                      None: () => failwith("sender has not voted yet")
+                    }
+                  )
+                ),
+                project.votes
+              )
+            }
+          ),
+          storage.projects
+        )
       };
     return [list([]), new_storage]
   }
