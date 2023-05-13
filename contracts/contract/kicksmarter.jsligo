@@ -190,9 +190,17 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
-    match(
-      Map.find_opt(param.milestone_id, project.milestones),
-      { Some: (_) => unit, None: () => failwith("milestone not found") }
+    let milestone =
+      match(
+        Map.find_opt(param.milestone_id, project.milestones),
+        {
+          Some: (milestone) => milestone,
+          None: () => failwith("milestone not found")
+        }
+      );
+    assert_with_error(
+      milestone.due_date < Tezos.get_now(),
+      "milestone must be finished to be desaproved"
     );
     const sender = Tezos.get_sender();
     const weight =
@@ -238,5 +246,59 @@ namespace Kicksmarter {
         )
       };
     return [list([]), new_storage]
+  };
+  type claim_milestone_param = { id: nat, milestone_id: nat };
+  /* @entry */
+  const claim_milestone = (param: claim_milestone_param, storage: TYPES.storage)
+    : [list<operation>, TYPES.storage] => {
+    const sender = Tezos.get_sender();
+    const project =
+      match(
+        Big_map.find_opt(param.id, storage.projects),
+        {
+          Some: (project) => project,
+          None: () => failwith("invalid project ID")
+        }
+      );
+    assert_with_error(
+      sender == project.owner,
+      "only project owner can claim milestone"
+    );
+    const milestone =
+      match(
+        Map.find_opt(param.milestone_id, project.milestones),
+        {
+          Some: (milestone) => milestone,
+          None: () => failwith("invalid milestone ID")
+        }
+      );
+    assert_with_error(
+      milestone.due_date > Tezos.get_now(),
+      "milestone must have started to be claimed"
+    );
+    assert_with_error(
+      milestone.required_amount != (0 as tez),
+      "milestone already claimed"
+    );
+    const new_project =
+      {
+        ...project,
+        milestones: Map.update(
+          param.milestone_id,
+          Some({ ...milestone, required_amount: (0 as tez) }),
+          project.milestones
+        )
+      };
+    const new_storage =
+      {
+        ...storage,
+        projects: Big_map.update(param.id, Some(new_project), storage.projects)
+      };
+    let receiver =
+      Tezos.get_contract_with_error(sender, "Contract not found.") as
+        contract<unit>;
+    let send_fund_op =
+      Tezos.transaction(unit, milestone.required_amount, receiver);
+    return [list([send_fund_op]), new_storage]
   }
 };
