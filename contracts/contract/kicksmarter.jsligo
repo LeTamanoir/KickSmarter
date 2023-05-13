@@ -13,7 +13,7 @@ namespace Kicksmarter {
     for (const m of param.milestones) {
       targetPrice += m.requiredAmount
     };
-    let new_project: TYPES.project =
+    let newProject: TYPES.project =
       {
         id: storage.totalProjects,
         owner: sender,
@@ -21,7 +21,7 @@ namespace Kicksmarter {
         milestones: param.milestones,
         targetPrice: targetPrice,
         currentPrice: 0 as tez,
-        investors: Map.empty as map<address, nat>,
+        investors: Map.empty as map<address, tez>,
         fundingStartDate: Tezos.get_now(),
         fundingDueDate: param.fundingDueDate
       };
@@ -33,21 +33,24 @@ namespace Kicksmarter {
           None: () => list([storage.totalProjects])
         }
       );
-    const newTotalProjects: nat = storage.totalProjects + (1 as nat);
     const newStorage =
       {
         ...storage,
-        projects: list([new_project, ...storage.projects]),
+        projects: Big_map.update(
+          storage.totalProjects,
+          Some(newProject),
+          storage.projects
+        ),
         addrToProjects: Big_map.update(
           sender,
           Some(newAddrToProjects),
           storage.addrToProjects
         ),
-        totalProjects: newTotalProjects
+        totalProjects: storage.totalProjects + (1 as nat)
       };
     return [list([]), newStorage]
   };
-  type fundProjectParam = { i: unit };
+  type fundProjectParam = { id: nat };
   /* @entry */
   const fundProject = (_: fundProjectParam, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {

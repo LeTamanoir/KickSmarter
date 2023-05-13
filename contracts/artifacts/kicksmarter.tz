@@ -1,5 +1,5 @@
 { parameter
-    (or (unit %fundProject)
+    (or (nat %fundProject)
         (pair %postProject
            (pair (timestamp %fundingDueDate) (string %metadata))
            (list %milestones
@@ -14,11 +14,12 @@
                 (big_map %projectMakers
                    address
                    (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating)))
-                (list %projects
+                (big_map %projects
+                   nat
                    (pair (pair (pair (pair (mutez %currentPrice) (timestamp %fundingDueDate))
                                      (timestamp %fundingStartDate)
                                      (nat %id))
-                               (pair (map %investors address nat) (string %metadata))
+                               (pair (map %investors address mutez) (string %metadata))
                                (list %milestones
                                   (pair (pair (timestamp %dueDate) (string %metadata))
                                         (mutez %requiredAmount)
@@ -41,7 +42,7 @@
              DUP 4 ;
              CAR ;
              CDR ;
-             EMPTY_MAP address nat ;
+             EMPTY_MAP address mutez ;
              PAIR ;
              PAIR ;
              DUP 5 ;
@@ -56,47 +57,49 @@
              PAIR ;
              PAIR ;
              PAIR ;
-             PUSH nat 1 ;
+             DUP 3 ;
              DUP 4 ;
-             CDR ;
-             ADD ;
-             DUP 4 ;
-             DUP 5 ;
              CAR ;
              DUP ;
              CDR ;
-             DUP 7 ;
+             DUP 6 ;
              CAR ;
              CDR ;
              CDR ;
-             DIG 5 ;
-             CONS ;
+             DIG 4 ;
+             SOME ;
+             DUP 7 ;
+             CDR ;
+             UPDATE ;
              UPDATE 2 ;
              UPDATE 2 ;
              UPDATE 1 ;
              DUP ;
              CAR ;
              DUP ;
+             CAR ;
+             DUP 5 ;
+             CAR ;
+             CAR ;
              CAR ;
              DUP 6 ;
              CAR ;
              CAR ;
              CAR ;
-             DUP 7 ;
-             CAR ;
-             CAR ;
-             CAR ;
-             DUP 7 ;
+             DUP 6 ;
              GET ;
-             IF_NONE { NIL nat ; DIG 7 ; CDR } { DIG 7 ; CDR } ;
+             IF_NONE { NIL nat ; DUP 7 ; CDR } { DUP 7 ; CDR } ;
              CONS ;
              SOME ;
-             DIG 6 ;
+             DIG 5 ;
              UPDATE ;
              UPDATE 1 ;
              UPDATE 1 ;
              UPDATE 1 ;
-             SWAP ;
+             PUSH nat 1 ;
+             DIG 2 ;
+             CDR ;
+             ADD ;
              UPDATE 2 } ;
          NIL operation ;
          PAIR } }
