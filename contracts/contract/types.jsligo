@@ -14,6 +14,8 @@ export type milestone = {
 
 export type vote = { voters: set<address>, total_weight: tez };
 
+export type status = ["FUNDING"] | ["IN_PROGRESS"] | ["COMPLETED"] | ["ABORTED"];
+
 export type project = {
   id: nat,
   owner: address,
@@ -24,7 +26,8 @@ export type project = {
   current_amount: tez,
   investors: map<address, tez>,
   funding_start_date: timestamp,
-  funding_due_date: timestamp
+  funding_due_date: timestamp,
+  status
 };
 
 export type storage = {

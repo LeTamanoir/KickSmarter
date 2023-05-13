@@ -139,7 +139,8 @@ namespace Kicksmarter {
         current_amount: 0 as tez,
         investors: Map.empty,
         funding_start_date: Tezos.get_now(),
-        funding_due_date: param.funding_due_date
+        funding_due_date: param.funding_due_date,
+        status: FUNDING() as TYPES.status
       };
     const new_addr_to_projects =
       match(
@@ -201,6 +202,7 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+    assert_with_error(project.status == FUNDING(), "Project is not in funding");
     assert_with_error(
       Tezos.get_now() < project.funding_due_date,
       "Project funding period has ended"
@@ -269,6 +271,7 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+    assert_with_error(project.status == IN_PROGRESS(), "Project is not in progress");
     let milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -339,6 +342,7 @@ namespace Kicksmarter {
           None: () => failwith("invalid project ID")
         }
       );
+    assert_with_error(project.status == IN_PROGRESS(), "Project is not in progress");
     assert_with_error(
       project.current_amount == project.target_amount,
       "project must be fully funded to claim milestone"
@@ -370,7 +374,8 @@ namespace Kicksmarter {
           param.milestone_id,
           Some({ ...milestone, required_amount: (0 as tez) }),
           project.milestones
-        )
+        ),
+        status: IN_PROGRESS()
       };
     const new_storage =
       {
