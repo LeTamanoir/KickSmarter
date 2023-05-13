@@ -1,7 +1,7 @@
 #!/bin/bash
 
 USERNAME=$1
-ALIAS=(echo $RANDOM)
+ALIAS=$(echo $RANDOM)
 CONTRACT=$3
 INITIAL_STORAGE=$4
 

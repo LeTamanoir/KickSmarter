@@ -16,7 +16,7 @@
                    (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating)))
                 (big_map %projects
                    nat
-                   (pair (pair (pair (pair (mutez %currentPrice) (timestamp %fundingDueDate))
+                   (pair (pair (pair (pair (mutez %currentAmount) (timestamp %fundingDueDate))
                                      (timestamp %fundingStartDate)
                                      (nat %id))
                                (pair (map %investors address mutez) (string %metadata))
@@ -25,11 +25,132 @@
                                         (mutez %requiredAmount)
                                         (timestamp %startDate)))
                                (address %owner))
-                         (mutez %targetPrice))))
+                         (mutez %targetAmount))))
           (nat %totalProjects)) ;
   code { UNPAIR ;
          IF_LEFT
-           { DROP }
+           { AMOUNT ;
+             PUSH mutez 0 ;
+             DUP 2 ;
+             COMPARE ;
+             GT ;
+             IF {}
+                { PUSH string "You must send at least 1 mutez to fund a project." ; FAILWITH } ;
+             DUP 3 ;
+             CAR ;
+             CDR ;
+             CDR ;
+             DUP 3 ;
+             GET ;
+             IF_NONE { PUSH string "Project not found." ; FAILWITH } {} ;
+             PUSH string "Project funding period has ended." ;
+             DUP 2 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             CDR ;
+             NOW ;
+             COMPARE ;
+             LT ;
+             IF { DROP } { FAILWITH } ;
+             PUSH string "Project is already fully funded." ;
+             DUP 2 ;
+             CDR ;
+             DUP 4 ;
+             DUP 4 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             CAR ;
+             ADD ;
+             COMPARE ;
+             LE ;
+             IF { DROP } { FAILWITH } ;
+             SENDER ;
+             DUP 2 ;
+             CAR ;
+             CDR ;
+             CAR ;
+             CAR ;
+             DUP 2 ;
+             GET ;
+             IF_NONE
+               { DUP 2 ; CAR ; CDR ; CAR ; CAR ; DUP 4 ; SOME ; DUP 3 ; UPDATE }
+               { DUP 3 ;
+                 CAR ;
+                 CDR ;
+                 CAR ;
+                 CAR ;
+                 DUP 5 ;
+                 DIG 2 ;
+                 ADD ;
+                 SOME ;
+                 DUP 3 ;
+                 UPDATE } ;
+             DUP 3 ;
+             DUP 4 ;
+             CAR ;
+             DUP ;
+             CAR ;
+             DUP ;
+             CAR ;
+             DIG 7 ;
+             DIG 7 ;
+             CAR ;
+             CAR ;
+             CAR ;
+             CAR ;
+             ADD ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             DUP 5 ;
+             DUP 6 ;
+             CAR ;
+             DUP ;
+             CDR ;
+             DUP 8 ;
+             CAR ;
+             CDR ;
+             CDR ;
+             DUP 5 ;
+             DIG 5 ;
+             CAR ;
+             DUP ;
+             CDR ;
+             DUP ;
+             CAR ;
+             DIG 8 ;
+             UPDATE 1 ;
+             UPDATE 1 ;
+             UPDATE 2 ;
+             UPDATE 1 ;
+             SOME ;
+             DIG 6 ;
+             UPDATE ;
+             UPDATE 2 ;
+             UPDATE 2 ;
+             UPDATE 1 ;
+             DUP ;
+             CAR ;
+             DUP ;
+             CAR ;
+             DIG 4 ;
+             CAR ;
+             CAR ;
+             CDR ;
+             PUSH nat 50 ;
+             PUSH nat 0 ;
+             PUSH nat 0 ;
+             PAIR ;
+             PAIR ;
+             SOME ;
+             DIG 5 ;
+             UPDATE ;
+             UPDATE 2 ;
+             UPDATE 1 ;
+             UPDATE 1 }
            { SENDER ;
              PUSH mutez 0 ;
              DUP 3 ;

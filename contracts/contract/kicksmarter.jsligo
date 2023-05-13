@@ -9,9 +9,9 @@ namespace Kicksmarter {
   const postProject = (param: postProjectParam, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     const sender = Tezos.get_sender();
-    let targetPrice: tez = 0 as tez;
+    let targetAmount: tez = 0 as tez;
     for (const m of param.milestones) {
-      targetPrice += m.requiredAmount
+      targetAmount += m.requiredAmount
     };
     let newProject: TYPES.project =
       {
@@ -19,8 +19,8 @@ namespace Kicksmarter {
         owner: sender,
         metadata: param.metadata,
         milestones: param.milestones,
-        targetPrice: targetPrice,
-        currentPrice: 0 as tez,
+        targetAmount: targetAmount,
+        currentAmount: 0 as tez,
         investors: Map.empty as map<address, tez>,
         fundingStartDate: Tezos.get_now(),
         fundingDueDate: param.fundingDueDate
@@ -72,7 +72,7 @@ namespace Kicksmarter {
       "Project funding period has ended."
     );
     assert_with_error(
-      project.currentPrice + value <= project.targetPrice,
+      project.currentAmount + value <= project.targetAmount,
       "Project is already fully funded."
     );
     const sender = Tezos.get_sender();
@@ -88,7 +88,7 @@ namespace Kicksmarter {
     const newProject =
       {
         ...project,
-        currentPrice: project.currentPrice + value,
+        currentAmount: project.currentAmount + value,
         investors: newInvestors
       };
     const newStorage =

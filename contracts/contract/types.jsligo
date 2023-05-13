@@ -22,8 +22,8 @@ export type project = {
   owner: address,
   metadata: string,
   milestones: list<milestone>,
-  targetPrice: tez,
-  currentPrice: tez,
+  targetAmount: tez,
+  currentAmount: tez,
   investors: map<address, tez>,
   fundingStartDate: timestamp,
   fundingDueDate: timestamp
