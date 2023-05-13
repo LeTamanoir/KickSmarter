@@ -1,10 +1,3 @@
-export type milestone = {
-  metadata: string,
-  requiredAmount: nat,
-  startDate: nat,
-  dueDate: nat
-};
-
 export type investor = {
   rating: nat,
   nbFakeInvestments: nat,
@@ -17,14 +10,21 @@ export type projectMaker = {
   nbRealProjects: nat
 };
 
+export type milestone = {
+  metadata: string,
+  requiredAmount: nat,
+  startDate: timestamp,
+  dueDate: timestamp
+};
+
 export type project = {
   metadata: string,
   milestones: list<milestone>,
   targetPrice: nat,
   currentPrice: tez,
   investors: map<address, nat>,
-  startDate: nat,
-  dueDate: nat
+  fundingStartDate: timestamp,
+  fundingDueDate: timestamp
 };
 
 export type storage = {

@@ -1,13 +1,11 @@
 { parameter
     (or (unit %clean)
         (pair %postProject
-           (pair (pair (mutez %currentPrice) (nat %dueDate))
-                 (map %investors address nat)
-                 (string %metadata))
-           (pair (list %milestones
-                    (pair (pair (nat %dueDate) (string %metadata)) (nat %requiredAmount) (nat %startDate)))
-                 (nat %startDate))
-           (nat %targetPrice))) ;
+           (pair (timestamp %fundingDueDate) (string %metadata))
+           (list %milestones
+              (pair (pair (timestamp %dueDate) (string %metadata))
+                    (nat %requiredAmount)
+                    (timestamp %startDate))))) ;
   storage
     (pair (pair (big_map %investors
                    address
@@ -17,40 +15,63 @@
                    (pair (pair (nat %nbFakeProjects) (nat %nbRealProjects)) (nat %rating))))
           (big_map %projects
              address
-             (list (pair (pair (pair (mutez %currentPrice) (nat %dueDate))
-                               (map %investors address nat)
-                               (string %metadata))
-                         (pair (list %milestones
-                                  (pair (pair (nat %dueDate) (string %metadata)) (nat %requiredAmount) (nat %startDate)))
-                               (nat %startDate))
+             (list (pair (pair (pair (mutez %currentPrice) (timestamp %fundingDueDate))
+                               (timestamp %fundingStartDate)
+                               (map %investors address nat))
+                         (pair (string %metadata)
+                               (list %milestones
+                                  (pair (pair (timestamp %dueDate) (string %metadata))
+                                        (nat %requiredAmount)
+                                        (timestamp %startDate))))
                          (nat %targetPrice))))) ;
   code { UNPAIR ;
          IF_LEFT
            { DROP 2 ;
              EMPTY_BIG_MAP
                address
-               (list (pair (pair (pair mutez nat) (map address nat) string)
-                           (pair (list (pair (pair nat string) nat nat)) nat)
+               (list (pair (pair (pair mutez timestamp) timestamp (map address nat))
+                           (pair string (list (pair (pair timestamp string) nat timestamp)))
                            nat)) ;
              EMPTY_BIG_MAP address (pair (pair nat nat) nat) ;
              EMPTY_BIG_MAP address (pair (pair nat nat) nat) ;
              PAIR ;
              PAIR }
            { SENDER ;
+             PUSH nat 0 ;
              DUP 3 ;
-             DUP 4 ;
              CDR ;
-             DIG 4 ;
-             CDR ;
+             ITER { CDR ; CAR ; ADD } ;
+             NIL (pair (pair timestamp string) nat timestamp) ;
              DUP 4 ;
+             CAR ;
+             CDR ;
+             PAIR ;
+             PAIR ;
+             EMPTY_MAP address nat ;
+             NOW ;
+             PAIR ;
+             DIG 3 ;
+             CAR ;
+             CAR ;
+             PUSH mutez 0 ;
+             PAIR ;
+             PAIR ;
+             PAIR ;
+             DUP 3 ;
+             CDR ;
+             DUP 3 ;
              GET ;
              IF_NONE
-               { NIL (pair (pair (pair mutez nat) (map address nat) string)
-                           (pair (list (pair (pair nat string) nat nat)) nat)
+               { NIL (pair (pair (pair mutez timestamp) timestamp (map address nat))
+                           (pair string (list (pair (pair timestamp string) nat timestamp)))
                            nat) }
                {} ;
-             DIG 4 ;
+             SWAP ;
              CONS ;
+             DUP 3 ;
+             DIG 3 ;
+             CDR ;
+             DIG 2 ;
              SOME ;
              DIG 3 ;
              UPDATE ;

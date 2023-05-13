@@ -1,15 +1,30 @@
 #import "./types.jsligo" "TYPES"
+#import "./params.jsligo" "PARAMS"
 namespace Kicksmarter {
   /* @entry */
-  const postProject = (project: TYPES.project, storage: TYPES.storage)
+  const postProject = (param: PARAMS.postProjectParam, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     const sender = Tezos.get_sender();
+    let targetPrice: nat = 0 as nat;
+    for (const m of param.milestones) {
+      targetPrice += m.requiredAmount
+    };
+    let new_project: TYPES.project =
+      {
+        metadata: param.metadata,
+        milestones: list([]),
+        targetPrice: targetPrice,
+        currentPrice: 0 as tez,
+        investors: Map.empty as map<address, nat>,
+        fundingStartDate: Tezos.get_now(),
+        fundingDueDate: param.fundingDueDate
+      };
     const newProjects =
       match(
         Big_map.find_opt(sender, storage.projects),
         {
-          Some: (projects) => list([project, ...projects]),
-          None: () => list([project])
+          Some: (projects) => list([new_project, ...projects]),
+          None: () => list([new_project])
         }
       );
     const newStorage =
