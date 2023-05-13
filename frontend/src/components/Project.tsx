@@ -3,28 +3,27 @@ import { Stack } from '@chakra-ui/react'
 import { Card, CardBody } from '@chakra-ui/react'
 // import Connection from './buttons/Connection';
 
+type ProjectProps = {
+  name: string;
+  description: string;
+  author: string;
+};
 
-const Project = () => {
+const Project = ({ name, description, author }: ProjectProps) => {
   return (
-    <Card maxW='sm'>
+    <Card maxW='md'>
       <CardBody>
         <Image
           src='https://www.pexels.com/photo/2662116/download/'
           alt='Project Preview'
-      />
-      <Stack mt='6' spacing='3'>
-        <Heading size='md'>Project Name here !</Heading>
-          <Text>
-            Lorem ipsum dolor sit amet, consectetur adipi elit.
-            Fusce eleifend nulla eget vulputate congue.
-            Donec porta tellus nec tempus tempus. Duis id laoreet libero, non molestie tellus.
-          </Text>
-          <Text as='i'>
-            Made with ♥ by ...
-          </Text>
-      </Stack>
-    </CardBody>
-  </Card>
+        />
+        <Stack mt='6' spacing='3'>
+          <Heading size='md'>{name}</Heading>
+          <Text>{description}</Text>
+          <Text as='i'>{author}</Text>
+        </Stack>
+      </CardBody>
+    </Card>
   );
 };
 
