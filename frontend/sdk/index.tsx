@@ -5,7 +5,6 @@ import { useTezosContext } from "@/src/contexts/TezosContext";
 import { TMethodsExternal } from "./types/TExternal";
 import { _getProject, _getStorage } from "./utils";
 import TMilestone from "./types/TMilestone";
-import { PINATA_PUBLIC_GATEWAY_URL } from "@/src/constants";
 
 const KicksmarterCtx = createContext<TKicksmarterCtx>({} as TKicksmarterCtx);
 const useKickSmarter = () => useContext(KicksmarterCtx);

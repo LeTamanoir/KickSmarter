@@ -2,6 +2,7 @@ import { MichelsonMap } from "@taquito/taquito";
 import { BigNumber } from "bignumber.js";
 import TMilestone from "./TMilestone";
 import Address from "./TAddress";
+import { TProjectStatus } from "./TProject";
 
 type TProjectExternal = {
   id: BigNumber;
@@ -25,6 +26,7 @@ type TProjectExternal = {
     BigNumber,
     { total_weight: BigNumber; voters: Address[] }
   >;
+  status: { [K in TProjectStatus]: void };
 };
 
 type TStorageExternal = {

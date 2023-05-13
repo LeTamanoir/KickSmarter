@@ -1,6 +1,6 @@
 import { TezosToolkit } from "@taquito/taquito";
 import { TProjectExternal, TStorageExternal } from "./types/TExternal";
-import TProject from "./types/TProject";
+import TProject, { TProjectStatus } from "./types/TProject";
 
 const _getProject = async (
   storage: TStorageExternal,
@@ -25,6 +25,7 @@ const _getProject = async (
     target_amount: tmp.target_amount.toNumber(),
     owner: tmp.owner,
     votes: [],
+    status: Object.keys(tmp.status)[0].toUpperCase() as TProjectStatus,
   };
 
   for (let [address, amount] of tmp.investors.entries()) {

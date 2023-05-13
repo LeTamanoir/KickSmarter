@@ -1,9 +1,10 @@
 #import "./types.jsligo" "TYPES"
 namespace Kicksmarter {
-  type abort_project_param = { id: nat, milestone_id: nat };
   /* @entry */
-  const abort_project = (param: abort_project_param, storage: TYPES.storage)
-    : [list<operation>, TYPES.storage] => {
+  const abort_project = (
+    param: { id: nat, milestone_id: nat },
+    storage: TYPES.storage
+  ): [list<operation>, TYPES.storage] => {
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -12,6 +13,10 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+    assert_with_error(
+      project.status != ABORTED(),
+      "project has already been aborted"
+    );
     let milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -53,38 +58,48 @@ namespace Kicksmarter {
       remaining_funds += milestone.required_amount
     };
     let refund_operations: list<operation> = list([]);
-
     for (const investor of project.investors) {
       let [address, investment] = investor;
       let interest = (investment / project.target_amount) * remaining_funds;
       match(
-        Tezos.get_contract_opt(address),
+        (Tezos.get_contract_opt(address) as option<contract<unit>>),
         {
-          Some: (receiver) => {
-            refund_operations =
-              [
-                Tezos.transaction(unit, interest, receiver),
-                ...refund_operations
-              ]
+          Some: (receiver: contract<unit>) => {
+            if (List.length(refund_operations) > (0 as nat)) {
+              refund_operations =
+                list(
+                  [
+                    Tezos.transaction(unit, interest, receiver),
+                    ...refund_operations
+                  ]
+                )
+            }
           },
           None: () => unit
         }
       )
     };
-
-    let new_storage = // to be continued...;
-
-
-    return [refund_operations, ];
-  };
-  type post_project_param = {
-    cid_metadata: string,
-    milestones: list<TYPES.milestone>,
-    funding_due_date: timestamp
+    let new_storage =
+      {
+        ...storage,
+        projects: Big_map.update(
+          param.id,
+          Some({ ...project, status: ABORTED() }),
+          storage.projects
+        )
+      };
+    return [refund_operations, new_storage]
   };
   /* @entry */
-  const post_project = (param: post_project_param, storage: TYPES.storage)
-    : [list<operation>, TYPES.storage] => {
+  const post_project = (
+    param
+      : {
+        cid_metadata: string,
+        milestones: list<TYPES.milestone>,
+        funding_due_date: timestamp
+      },
+    storage: TYPES.storage
+  ): [list<operation>, TYPES.storage] => {
     assert_with_error(
       String.length(param.cid_metadata) > (0 as nat),
       "metadata must be non-empty"
@@ -140,7 +155,7 @@ namespace Kicksmarter {
         investors: Map.empty,
         funding_start_date: Tezos.get_now(),
         funding_due_date: param.funding_due_date,
-        status: FUNDING() as TYPES.status
+        status: FUNDING()
       };
     const new_addr_to_projects =
       match(
@@ -185,9 +200,8 @@ namespace Kicksmarter {
       };
     return [list([]), new_storage]
   };
-  type fund_project_param = { id: nat };
   /* @entry */
-  const fund_project = (param: fund_project_param, storage: TYPES.storage)
+  const fund_project = (param: { id: nat }, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
     const amount: tez = Tezos.get_amount();
     assert_with_error(
@@ -257,10 +271,9 @@ namespace Kicksmarter {
       };
     return [list([]), new_storage]
   };
-  type disapprove_milestone_param = { id: nat, milestone_id: nat };
   /* @entry */
   const disapprove_milestone = (
-    param: disapprove_milestone_param,
+    param: { id: nat, milestone_id: nat },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
     const project =
@@ -271,7 +284,10 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
-    assert_with_error(project.status == IN_PROGRESS(), "Project is not in progress");
+    assert_with_error(
+      project.status == IN_PROGRESS(),
+      "Project is not in progress"
+    );
     let milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -329,10 +345,11 @@ namespace Kicksmarter {
       };
     return [list([]), new_storage]
   };
-  type claim_milestone_param = { id: nat, milestone_id: nat };
   /* @entry */
-  const claim_milestone = (param: claim_milestone_param, storage: TYPES.storage)
-    : [list<operation>, TYPES.storage] => {
+  const claim_milestone = (
+    param: { id: nat, milestone_id: nat },
+    storage: TYPES.storage
+  ): [list<operation>, TYPES.storage] => {
     const sender = Tezos.get_sender();
     const project =
       match(
@@ -342,7 +359,10 @@ namespace Kicksmarter {
           None: () => failwith("invalid project ID")
         }
       );
-    assert_with_error(project.status == IN_PROGRESS(), "Project is not in progress");
+    assert_with_error(
+      project.status == IN_PROGRESS(),
+      "Project is not in progress"
+    );
     assert_with_error(
       project.current_amount == project.target_amount,
       "project must be fully funded to claim milestone"
