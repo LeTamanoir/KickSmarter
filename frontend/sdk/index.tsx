@@ -4,6 +4,7 @@ import TProject from "./types/TProject";
 import { useTezosContext } from "@/src/contexts/TezosContext";
 import { TMethodsExternal } from "./types/TExternal";
 import {
+  _getMethods,
   _getProject,
   _getStorage,
   pushImageToIPFS,
@@ -55,10 +56,11 @@ const KicksmarterProvider = ({
       throw new Error("Not connected");
     }
 
-    let contract = await tezos!.wallet.at(contractAddress);
-    let methods = contract.methods as unknown as TMethodsExternal;
+    let methods = await _getMethods(tezos!, contractAddress);
 
-    methods.post_project(cid_metadata, funding_due_date, milestones).send();
+    await methods
+      .post_project(cid_metadata, funding_due_date, milestones)
+      .send();
   };
 
   const vote = async ({
@@ -72,8 +74,7 @@ const KicksmarterProvider = ({
       throw new Error("Not connected");
     }
 
-    let contract = await tezos!.wallet.at(contractAddress);
-    let methods = contract.methods as unknown as TMethodsExternal;
+    let methods = await _getMethods(tezos!, contractAddress);
 
     await methods.disapprove_milestone(project_id, milestone_id).send();
   };
@@ -86,15 +87,42 @@ const KicksmarterProvider = ({
       throw new Error("Not connected");
     }
 
-    let contract = await tezos!.wallet.at(contractAddress);
-    let methods = contract.methods as unknown as TMethodsExternal;
+    let methods = await _getMethods(tezos!, contractAddress);
 
     await methods.fund_project(project_id).send({ amount });
+  };
+
+  const claimMilestone = async (
+    project_id: number,
+    milestone_id: number
+  ): Promise<void> => {
+    if (!connected) {
+      throw new Error("Not connected");
+    }
+
+    let methods = await _getMethods(tezos!, contractAddress);
+
+    await methods.claim_milestone(project_id, milestone_id).send();
+  };
+
+  const abortProject = async (
+    project_id: number,
+    milestone_id: number
+  ): Promise<void> => {
+    if (!connected) {
+      throw new Error("Not connected");
+    }
+
+    let methods = await _getMethods(tezos!, contractAddress);
+
+    await methods.abort_project(project_id, milestone_id).send();
   };
 
   return (
     <KicksmarterCtx.Provider
       value={{
+        claimMilestone,
+        abortProject,
         pushMetadataToIPFS,
         pushImageToIPFS,
         getProjects,

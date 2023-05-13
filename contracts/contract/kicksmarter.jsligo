@@ -298,7 +298,7 @@ namespace Kicksmarter {
       );
     assert_with_error(
       milestone.due_date < Tezos.get_now(),
-      "milestone must be finished to be desaproved"
+      "milestone must be finished to be disapproved"
     );
     const sender = Tezos.get_sender();
     const weight =

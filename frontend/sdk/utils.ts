@@ -1,5 +1,9 @@
 import { TezosToolkit } from "@taquito/taquito";
-import { TProjectExternal, TStorageExternal } from "./types/TExternal";
+import {
+  TMethodsExternal,
+  TProjectExternal,
+  TStorageExternal,
+} from "./types/TExternal";
 import TProject, { TProjectStatus } from "./types/TProject";
 
 const _getProject = async (
@@ -65,6 +69,16 @@ const _getStorage = async (
   return storage;
 };
 
+const _getMethods = async (
+  tezos: TezosToolkit,
+  contractAddress: string
+): Promise<TMethodsExternal> => {
+  let contract = await tezos.wallet.at(contractAddress);
+  let methods = contract.methods as TMethodsExternal;
+
+  return methods;
+};
+
 const pushImageToIPFS = async (image: File): Promise<string> => {
   const reader = new FileReader();
   reader.readAsDataURL(new Blob([image]));
@@ -115,4 +129,10 @@ const pushMetadataToIPFS = async ({
   return data.ipfsHash;
 };
 
-export { _getProject, _getStorage, pushImageToIPFS, pushMetadataToIPFS };
+export {
+  _getProject,
+  _getMethods,
+  _getStorage,
+  pushImageToIPFS,
+  pushMetadataToIPFS,
+};

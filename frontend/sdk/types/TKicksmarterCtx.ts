@@ -26,6 +26,10 @@ type KicksmarterCtx = {
 
   fundProject: (project_id: number, amount: number) => Promise<void>;
 
+  claimMilestone: (project_id: number, milestone_id: number) => Promise<void>;
+
+  abortProject: (project_id: number, milestone_id: number) => Promise<void>;
+
   pushMetadataToIPFS: ({
     title,
     description,
