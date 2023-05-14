@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import TKicksmarter from "./types/TKicksmarter";
 import TProject from "./types/TProject";
-import { useTezosContext } from "@/src/contexts/TezosContext";
+import { useTezosContext } from "@/contexts/TezosContext";
 import {
   _assertWalletConnection,
   _getMethods,
@@ -36,7 +36,7 @@ const KicksmarterProvider = ({
 
   const getProjects = async (): Promise<TProject[]> => {
     let storage = await _getStorage(tezos!, contractAddress);
-    let total_projects = storage.total_projects.toNumber();
+    let total_projects = storage?.total_projects.toNumber();
 
     const projects: TProject[] = [];
 
