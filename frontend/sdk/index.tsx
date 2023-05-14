@@ -36,7 +36,7 @@ const KicksmarterProvider = ({
 
   const getProjects = async (): Promise<TProject[]> => {
     let storage = await _getStorage(tezos!, contractAddress);
-    let total_projects = storage.total_projects.toNumber();
+    let total_projects = storage?.total_projects.toNumber();
 
     const projects: TProject[] = [];
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { VStack, Text, Box, SimpleGrid, Input, InputGroup, Button, InputLeftElement } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
 
@@ -6,21 +6,20 @@ import _ from 'lodash';
 
 import Navbar from '@/components/Navbar';
 import Project from '@/components/Project';
+import { useKickSmarter } from '../sdk';
+import TProject from '../sdk/types/TProject';
 
 const Projects = () => {
 
-    const [projects, setProjects] = useState<any[]>([
-        {name: "Gatien la chauve2", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve3", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve4", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve5", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve6", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve7", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve8", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve9", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve0", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-        {name: "Gatien la chauve1", description: "Projet visant à démocratiser la chevelure de Gatienfjkdsjfksjdfkjdsjflksdjfksldjfksdjfklsdjqlfkjskdljfklsdqjfl", author: "FSDFJSKJF"},
-    ]);
+    const KickSmarter = useKickSmarter();
+
+    const [projects, setProjects] = useState<TProject[]>([]);
+
+    useEffect(() => {
+        KickSmarter.getProjects()
+            .then((kickProjects) => setProjects(kickProjects))
+            .catch((e) => console.error(e));
+    }, [projects]);
 
     const [search, setSearch] = useState<string>(""); // TODO
     const [nElem, setnElem] = useState<number>(9);
@@ -44,8 +43,8 @@ const Projects = () => {
                 <VStack mt="30px">
                     <SimpleGrid columns={3} spacingX="50px" spacingY="50px" mb="20px">
                         {projects.slice(0, nElem).map((project) => (
-                            <Box key={project.name}>
-                                <Project name={project.name} description={project.description} author={project.author} />
+                            <Box key={project.id}>
+                                <Project id={project.id} description={""} author={project.owner} />
                             </Box>
                         ))}
                     </SimpleGrid>
