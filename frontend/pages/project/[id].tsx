@@ -17,12 +17,6 @@ import {
 	StepIcon,
 	StepNumber,
 	Box,
-	Divider,
-	Card,
-	Stack,
-	CardBody,
-	Heading,
-	CardFooter,
 	Button,
 	Input,
 } from '@chakra-ui/react';
