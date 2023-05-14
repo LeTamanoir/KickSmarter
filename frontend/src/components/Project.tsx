@@ -1,31 +1,52 @@
-import { Image, Text, Heading } from '@chakra-ui/react';
-import { Stack } from '@chakra-ui/react'
-import { Card, CardBody, Link } from '@chakra-ui/react'
-// import Connection from './buttons/Connection';
+import { Image, Text, Heading, Box, Badge } from "@chakra-ui/react";
+import { Stack } from "@chakra-ui/react";
+import { Card, CardBody, Link } from "@chakra-ui/react";
 
 type ProjectProps = {
   id: number;
+  title: string;
   description: string;
   author: string;
 };
 
-const Project = ({ id, description, author }: ProjectProps) => {
+const Project = ({ id, title, description, author }: ProjectProps) => {
   return (
-    <Card maxW='md'>
-      <CardBody>
-        <Link href={`/project/${id}`}>
-          <Image
-            src='https://www.pexels.com/photo/2662116/download/'
-            alt='Project Preview'
-          />
-          <Stack mt='6' spacing='3'>
-            <Heading size='md'>{id}</Heading>
-            <Text>{description}</Text>
-            <Text as='i'>by {author}</Text>
-          </Stack>
-        </Link>
-      </CardBody>
-    </Card>
+    <Box maxW="sm" borderWidth="1px" borderRadius="lg" overflow="hidden">
+      <Image
+        src="https://www.pexels.com/photo/2662116/download/"
+        alt="Project preview"
+      />
+
+      <Box p="6">
+        <Box display="flex" alignItems="start">
+          <Badge borderRadius="full" px="2" colorScheme="teal">
+            New
+          </Badge>
+          <Box
+            fontWeight="semibold"
+            letterSpacing="wide"
+            fontSize="xs"
+            textTransform="uppercase"
+            ml="2"
+          >
+            {title}
+          </Box>
+        </Box>
+
+        <Box
+          as={Link}
+          href={`/project/${id}`}
+          mt="1"
+          fontWeight="semibold"
+          lineHeight="tight"
+          noOfLines={1}
+        >
+          {description}
+        </Box>
+
+        <Box>{author}</Box>
+      </Box>
+    </Box>
   );
 };
 

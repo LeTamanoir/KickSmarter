@@ -1,19 +1,34 @@
-import Navbar from '@/components/Navbar';
-import { FormControl, Input, VStack, FormLabel, Textarea, Button, Heading, Text, TableContainer, Table, TableCaption, Thead, Tr, Th, Tbody, Td, useDisclosure } from '@chakra-ui/react'
-import { useState } from 'react';
-import TProject from '../sdk/types/TProject';
-import TMilestone from '../sdk/types/TMilestone';
-import { useKickSmarter } from '../sdk';
-import NewMilestone from '@/components/NewMilestone';
+import Navbar from "@/components/Navbar";
+import {
+  FormControl,
+  Input,
+  VStack,
+  FormLabel,
+  Textarea,
+  Button,
+  Text,
+  TableContainer,
+  Table,
+  TableCaption,
+  Thead,
+  Tr,
+  Th,
+  Tbody,
+  Td,
+  useDisclosure,
+} from "@chakra-ui/react";
+import { useState } from "react";
+import TMilestone from "../sdk/types/TMilestone";
+import { useKickSmarter } from "../sdk";
+import NewMilestone from "@/components/NewMilestone";
 
 type TCreateProject = {
   cid_metadata: string;
   milestones: TMilestone[];
   funding_due_date: Date;
-}
+};
 
 const Create = () => {
-
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [milestones, setMilestones] = useState<TMilestone[]>([]);
@@ -25,23 +40,23 @@ const Create = () => {
   const KickSmarter = useKickSmarter();
 
   const submitProject = () => {
-    KickSmarter.pushMetadataToIPFS({ title, description, images})
+    KickSmarter.pushMetadataToIPFS({ title, description, images })
       .then((response) => {
         KickSmarter.postProject({
           cid_metadata: response,
           milestones,
-          funding_due_date: dueDate
+          funding_due_date: dueDate,
         })
           .then((response) => {})
           .catch((e) => console.error(e));
       })
       .catch((error) => console.error(error));
-  }
+  };
 
   const newMilestone = (milestone: TMilestone) => {
-    setMilestones(prevState => [...prevState, milestone]);
+    setMilestones((prevState) => [...prevState, milestone]);
     // console.log("milestones", milestones);
-  }
+  };
 
   return (
     <VStack w="100%">
@@ -51,21 +66,41 @@ const Create = () => {
 
         <FormControl>
           <FormLabel marginTop="5">Name of your project</FormLabel>
-          <Input value={title} onChange={(event) => setTitle(event.target.value)} placeholder='placeholder' />
+          <Input
+            value={title}
+            onChange={(event) => setTitle(event.target.value)}
+            placeholder="placeholder"
+          />
         </FormControl>
 
         <FormControl>
           <FormLabel marginTop="5">Description of your project</FormLabel>
-          <Input value={description} onChange={(event) => setDesc(event.target.value)} placeholder ='placeholder' />
+          <Input
+            value={description}
+            onChange={(event) => setDesc(event.target.value)}
+            placeholder="placeholder"
+          />
         </FormControl>
 
         <FormControl>
           <FormLabel marginTop="5">End date of the funding</FormLabel>
-          <Input type="date" value={dueDate.getFullYear().toString() + "-" + (dueDate.getMonth() + 1).toString().padStart(2, 0) + "-" + dueDate.getDate().toString().padStart(2, 0)} onChange={(event) => setDueDate(new Date(event.target.value))}/>
+          <Input
+            type="date"
+            value={
+              dueDate.getFullYear().toString() +
+              "-" +
+              (dueDate.getMonth() + 1).toString().padStart(2, "0") +
+              "-" +
+              dueDate.getDate().toString().padStart(2, "0")
+            }
+            onChange={(event) => setDueDate(new Date(event.target.value))}
+          />
         </FormControl>
 
         <VStack w="100%">
-          <FormLabel alignSelf="start" marginTop="5">Milestones</FormLabel>
+          <FormLabel alignSelf="start" marginTop="5">
+            Milestones
+          </FormLabel>
           <TableContainer w="100%">
             <Table variant="simple">
               <TableCaption>Imperial to metric conversion factors</TableCaption>
@@ -87,24 +122,27 @@ const Create = () => {
               </Tbody>
             </Table>
           </TableContainer>
-          <Button bg="#7cb4c4" onClick={onOpen}>Add new milestone</Button>
-          <NewMilestone isOpen={isOpen} onClose={onClose} confirm={newMilestone} />
+          <Button bg="#7cb4c4" onClick={onOpen}>
+            Add new milestone
+          </Button>
+          <NewMilestone
+            isOpen={isOpen}
+            onClose={onClose}
+            confirm={newMilestone}
+          />
         </VStack>
 
         <FormControl>
-          <FormLabel marginTop="5">Your promise for your investors at the end of the fundraising</FormLabel>
+          <FormLabel marginTop="5">
+            Your promise for your investors at the end of the fundraising
+          </FormLabel>
           <Textarea placeholder="placeholder" />
         </FormControl>
-        <Button
-          isLoading={isLoading}
-          onClick={submitProject}
-          bg="#7cb4c4"
-        >
+        <Button isLoading={isLoading} onClick={submitProject} bg="#7cb4c4">
           Submit project
         </Button>
-
       </VStack>
-      </VStack>
+    </VStack>
   );
 };
 
