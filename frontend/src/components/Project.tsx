@@ -1,6 +1,5 @@
-import { Image, Text, Heading, Box, Badge } from "@chakra-ui/react";
-import { Stack } from "@chakra-ui/react";
-import { Card, CardBody, Link } from "@chakra-ui/react";
+import { Image, Box, Badge } from "@chakra-ui/react";
+import Link from "next/link";
 
 type ProjectProps = {
   id: number;

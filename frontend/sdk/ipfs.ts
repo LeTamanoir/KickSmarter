@@ -1,4 +1,4 @@
-import { PINATA_PUBLIC_GATEWAY_URL } from "@/src/constants";
+import { PINATA_PUBLIC_GATEWAY_URL } from "../src/constants";
 
 const pushImageToIPFS = async (image: File): Promise<string> => {
   const reader = new FileReader();

@@ -1,4 +1,4 @@
-import { Box, Flex, VStack, Text, Button } from "@chakra-ui/react";
+import { Box, Flex, VStack, Text } from "@chakra-ui/react";
 import Project from "./Project";
 import Connection from "./buttons/Connection";
 import Footer from "./Footer";

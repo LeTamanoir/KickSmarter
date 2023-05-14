@@ -13,7 +13,7 @@ const Navbar = () => {
         borderBottomColor="#E8E8E8"
       >
         <Link href="/">
-          <Image h="40px" src="/assets/logo.png" />
+          <Image h="40px" src="/assets/logo.png" alt="logo" />
         </Link>
 
         <HStack spacing="40px">
