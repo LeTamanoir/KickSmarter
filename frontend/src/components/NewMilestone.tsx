@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TMilestone from "@/../sdk/types/TMilestone";
+import TMilestone from "@/sdk/types/TMilestone";
 import {
   Modal,
   ModalOverlay,
@@ -12,8 +12,9 @@ import {
   Button,
   FormControl,
   FormLabel,
+  Spacer,
 } from "@chakra-ui/react";
-import { useKickSmarter } from "@/../sdk";
+import { useKickSmarter } from "@/sdk";
 
 type NewMilestoneProps = {
   isOpen: boolean;

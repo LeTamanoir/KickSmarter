@@ -1,7 +1,7 @@
 import { VStack } from "@chakra-ui/react";
 
-import Navbar from "@/components/Navbar";
-import WelcomePage from "@/components/WelcomePage";
+import Navbar from "@/src/components/Navbar";
+import WelcomePage from "@/src/components/WelcomePage";
 
 const Home = () => (
   <VStack w="100%">
