@@ -1,48 +1,62 @@
 import React from "react";
-import {
-    Heading,
-    VStack,
-    Avatar, HStack, Button, Link, NextLink,
-} from "@chakra-ui/react";
+import { Heading, VStack, Avatar, Button, Flex } from "@chakra-ui/react";
 import Navbar from "@/components/Navbar";
 
-const CardProfile = ():JSX.Elements => {
-    return (
-            <HStack spacing="150px" alignSelf={"center"}>
-                <VStack mb="%10">
-                <Avatar size='2xl' name='Ismaël' src='/assets/isma.jpeg'/>{' '}
-                <Button as="a" href="https://www.linkedin.com/in/ismael-fall/" bg='#7CB4C4'>Ismaël</Button>
-                </VStack >
-                <VStack mb="%10">
-                <Avatar size='2xl' name='Martin' src='/assets/martin.jpg'/>{' '}
-                <Button as="a" href="https://www.linkedin.com/in/martin-saldinger/" bg='#7CB4C4'>Martin</Button>
-                </VStack >
-                <VStack mb="%10">
-                <Avatar size='2xl' name='Léo' src='/assets/léo.jpg'/>{' '}
-                <Button as="a" href="https://www.linkedin.com/in/leo-dubosclard/" bg='#7CB4C4'>Léo</Button>
-                </VStack >
-                <VStack mb="%10">
-                <Avatar size='2xl' name='Gatien' src='/assets/gatien.jpg'/>{' '}
-                <Button as="a" href="https://www.linkedin.com/in/gatien-rittner/" bg='#7CB4C4'>Gatien</Button>
-                </VStack >
-                <VStack mb="%10">
-                <Avatar size='2xl' name='Mounia' src=''/>{' '}
-                <Button as="a" href="https://www.linkedin.com/in/mounia-arjdal/" bg='#7CB4C4'>Mounia</Button>
-                </VStack >
-            </HStack>
-    );
-}
+const Persons = [
+  {
+    picture: "/assets/isma.jpeg",
+    link: "https://www.linkedin.com/in/ismael-fall/",
+    name: "Ismaël",
+  },
+  {
+    picture: "/assets/martin.jpg",
+    link: "https://www.linkedin.com/in/martin-saldinger/",
+    name: "Martin",
+  },
+  {
+    picture: "/assets/leo.jpg",
+    link: "https://www.linkedin.com/in/leo-dubosclard/",
+    name: "Léo",
+  },
+  {
+    picture: "/assets/mounia.jpg",
+    link: "https://www.linkedin.com/in/mounia-arjdal/",
+    name: "Mounia",
+  },
+  {
+    picture: "/assets/gatien.jpg",
+    link: "https://www.linkedin.com/in/gatien-rittner/",
+    name: "Gatien",
+  },
+];
+
+const CardProfile = (): JSX.Element => (
+  <Flex alignSelf={"center"}>
+    {Persons.map((person) => (
+      <VStack mb="%10" mx="8" key={person.link}>
+        <Avatar size="2xl" name={person.name} src={person.picture} />
+        <Button as="a" href={person.link} bg="#7CB4C4">
+          {person.name}
+        </Button>
+      </VStack>
+    ))}
+  </Flex>
+);
 
 const about = () => {
-    return (
-        <>
-            <Navbar />
-            <VStack mt='3%' spacing='3' mb="7%">
-                <Heading mb="5%" size='md'>About us...</Heading>
-                <CardProfile/>
-            </VStack>
-        </>
-    );
-}
+  return (
+    <>
+      <Navbar />
+
+      <VStack mt="3%" spacing="3" mb="7%">
+        <Heading mb="5%" size="md">
+          About us
+        </Heading>
+
+        <CardProfile />
+      </VStack>
+    </>
+  );
+};
 
 export default about;
