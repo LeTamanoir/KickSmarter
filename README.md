@@ -80,7 +80,7 @@ const Wrapper = ({children}: {children: JSX.Element}): JSX.Element => (
 );
 ```
 
-You can find a demo application in the `client` directory that uses the SDK.
+You can find a demo application in the `frontend` directory that uses the SDK. It is currently deployed [here](https://kick-smarter.vercel.app/).
 
 ### 1. Create a Project
 
@@ -118,7 +118,7 @@ fundProject: (project_id: number, amount: number) => Promise<void>;
 
 ### 3. Query
 
-To query the projects, you can use the `getProjects` and `getProject` function.
+To query the projects, you can use the `getProjects` and `getProject` functions.
 
 ```ts
 getProjects: () => Promise<TProject[]>;
