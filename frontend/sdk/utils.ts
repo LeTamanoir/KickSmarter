@@ -51,8 +51,8 @@ const _getProject = async (storage: TStorageExternal, project_id: number): Promi
 };
 
 const _getStorage = async (tezos: TezosToolkit, contractAddress: string): Promise<TStorageExternal> => {
-	let contract = await tezos?.contract.at(contractAddress);
-	let storage = (await contract?.storage()) as TStorageExternal;
+	let contract = await tezos.contract.at(contractAddress);
+	let storage = (await contract.storage()) as TStorageExternal;
 
 	return storage;
 };
