@@ -195,46 +195,6 @@ const ProjectDesc = (): JSX.Element => {
 						</HStack>
 					</>
 				)}
-
-				<Divider />
-
-				<Text fontSize='2xl' pt='20px' fontWeight='bold' pb='20px'>
-					News
-				</Text>
-				<Card direction={{ base: 'column', sm: 'row' }} overflow='hidden' variant='outline'>
-					<Image
-						objectFit='cover'
-						maxW={{ base: '100%', sm: '200px' }}
-						src='https://images.unsplash.com/photo-1667489022797-ab608913feeb?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHw5fHx8ZW58MHx8fHw%3D&auto=format&fit=crop&w=800&q=60'
-						alt='Caffe Latte'
-					/>
-					<Stack>
-						<CardBody>
-							<Heading size='md'>Le coiffeur de Gatien</Heading>
-							<Text py='2' maxW='3xl'>
-								Etiam faucibus, turpis id iaculis tincidunt, metus enim blandit lacus, a sodales velit ante eu ipsum.
-								Proin maximus placerat lectus, nec sagittis nisl sollicitudin ut. Fusce hendrerit neque a felis
-								consectetur, ut gravida felis vestibulum. Sed purus orci, tincidunt non ex id, dignissim vehicula ex.
-								Phasellus nec arcu eget lacus facilisis tincidunt vitae id sapien. Suspendisse pulvinar nibh sit amet
-								arcu molestie, vitae venenatis ex pretium. Mauris eget arcu massa. Aliquam condimentum dolor cursus
-								vehicula ultricies. Pellentesque fringilla quam quis arcu porta, vitae finibus est sagittis. Integer
-								pellentesque, est vitae interdum fermentum, mauris tortor auctor arcu, in hendrerit dolor velit at urna.
-								Etiam faucibus, turpis id iaculis tincidunt, metus enim blandit lacus, a sodales velit ante eu ipsum.
-								Proin maximus placerat lectus, nec sagittis nisl sollicitudin ut. Fusce hendrerit neque a felis
-								consectetur, ut gravida felis vestibulum. Sed purus orci, tincidunt non ex id, dignissim vehicula ex.
-								Phasellus nec arcu eget lacus facilisis tincidunt vitae id sapien. Suspendisse pulvinar nibh sit amet
-								arcu molestie, vitae venenatis ex pretium. Mauris eget arcu massa. Aliquam condimentum dolor cursus
-								vehicula ultricies. Pellentesque fringilla quam quis arcu porta, vitae finibus est sagittis. Integer
-								pellentesque, est vitae interdum fermentum, mauris tortor auctor arcu, in hendrerit dolor velit at urna.
-							</Text>
-						</CardBody>
-						<CardFooter>
-							<Button variant='solid' colorScheme='blue'>
-								View more
-							</Button>
-						</CardFooter>
-					</Stack>
-				</Card>
 			</VStack>
 		</>
 	);
