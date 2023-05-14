@@ -8,6 +8,12 @@ import { useKickSmarter } from '@/../sdk';
 import TProject from '@/../sdk/types/TProject';
 import TMilestone from '@/../sdk/types/TMilestone';
 
+type Metadata = {
+    title: string;
+    description: string;
+    images: string[];
+}
+
 const ProjectDesc = (): JSX.Element => {
 
     const router = useRouter();
@@ -15,6 +21,7 @@ const ProjectDesc = (): JSX.Element => {
     const KickSmarter = useKickSmarter();
 
     const [project, setProject] = useState<TProject>();
+    const [metadata, setMetadata] = useState<Metadata>();
 
     const { activeStep } = useSteps({
         index: 0,
@@ -24,7 +31,11 @@ const ProjectDesc = (): JSX.Element => {
     useEffect(() => {
         const projectId: number = parseInt(router.query.id as string);
         KickSmarter.getProject(projectId)
-            .then((kickProject) => setProject(kickProject))
+            .then(async (kickProject) => {
+                setProject(kickProject);
+                // load metadata
+                // load file
+            })
             .catch((e) => console.error(e));
     }, [router, project]);
 

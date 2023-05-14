@@ -22,25 +22,19 @@ import TMilestone from "../sdk/types/TMilestone";
 import { useKickSmarter } from "../sdk";
 import NewMilestone from "@/components/NewMilestone";
 
-type TCreateProject = {
-  cid_metadata: string;
-  milestones: TMilestone[];
-  funding_due_date: Date;
-};
-
 const Create = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [milestones, setMilestones] = useState<TMilestone[]>([]);
   const [dueDate, setDueDate] = useState<Date>(new Date(Date.now()));
-  const [images, setImages] = useState<any[]>([]); // Images
+  const [image, setImage] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [description, setDesc] = useState<string>("");
 
   const KickSmarter = useKickSmarter();
 
   const submitProject = () => {
-    KickSmarter.pushMetadataToIPFS({ title, description, images })
+    KickSmarter.pushMetadataToIPFS({ title, description, images: [image]})
       .then((response) => {
         KickSmarter.postProject({
           cid_metadata: response,
@@ -54,9 +48,8 @@ const Create = () => {
   };
 
   const newMilestone = (milestone: TMilestone) => {
-    setMilestones((prevState) => [...prevState, milestone]);
-    // console.log("milestones", milestones);
-  };
+    setMilestones(prevState => [...prevState, milestone]);
+  }
 
   return (
     <VStack w="100%">
@@ -80,6 +73,24 @@ const Create = () => {
             onChange={(event) => setDesc(event.target.value)}
             placeholder="placeholder"
           />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel>Select an image to illustrate the project</FormLabel>
+        <input
+        type="file"
+        onChange={async (e) => {
+          if (!e.target.files) return;
+
+          let file = e.target.files[0];
+
+          try {
+            setImage(await KickSmarter.pushImageToIPFS(file));
+          } catch (e) {
+            console.error(e);
+          }
+        }}
+      />
         </FormControl>
 
         <FormControl>
