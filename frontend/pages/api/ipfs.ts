@@ -1,4 +1,4 @@
-import { PINATA_UPLOAD_URL } from "@/constants";
+import { PINATA_UPLOAD_URL } from "@/src/constants";
 import type { NextApiRequest, NextApiResponse } from "next";
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {

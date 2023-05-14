@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+import Navbar from "@/src/components/Navbar";
 import {
   FormControl,
   Input,
@@ -18,9 +18,9 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import TMilestone from "../sdk/types/TMilestone";
-import { useKickSmarter } from "../sdk";
-import NewMilestone from "@/components/NewMilestone";
+import TMilestone from "@/sdk/types/TMilestone";
+import { useKickSmarter } from "@/sdk";
+import NewMilestone from "@/src/components/NewMilestone";
 
 const Create = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();

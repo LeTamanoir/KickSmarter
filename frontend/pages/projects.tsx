@@ -10,8 +10,8 @@ import {
   InputLeftElement,
 } from "@chakra-ui/react";
 import { Search2Icon } from "@chakra-ui/icons";
-import Navbar from "@/components/Navbar";
-import Project from "@/components/Project";
+import Navbar from "@/src/components/Navbar";
+import Project from "@/src/components/Project";
 import { useKickSmarter } from "../sdk";
 import TProject from "../sdk/types/TProject";
 
@@ -22,7 +22,10 @@ const Projects = () => {
 
   useEffect(() => {
     KickSmarter.getProjects()
-      .then((kickProjects) => setProjects(kickProjects))
+      .then((kickProjects) => {
+        console.log(kickProjects);
+        setProjects(kickProjects);
+      })
       .catch((e) => console.error(e));
   }, [projects]);
 

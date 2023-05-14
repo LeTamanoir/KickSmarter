@@ -1,7 +1,7 @@
 import { Button, HStack, Image, Text } from '@chakra-ui/react';
-import { useTezosContext } from '@/contexts/TezosContext';
+import { useTezosContext } from '@/src/contexts/TezosContext';
 import { useEffect } from 'react';
-import { CONTRACT_ADDRESS } from '@/constants';
+import { CONTRACT_ADDRESS } from '@/src/constants';
 
 const Connection = () => {
     const { wallet, tezos, connectWallet, disconnectWallet, connected } = useTezosContext();
