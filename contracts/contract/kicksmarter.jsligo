@@ -418,7 +418,7 @@ namespace Kicksmarter {
         }
       );
     assert_with_error(
-      project.status == IN_PROGRESS(),
+      project.status == IN_PROGRESS() || project.status == FUNDING(),
       "Project is not in progress"
     );
     assert_with_error(
