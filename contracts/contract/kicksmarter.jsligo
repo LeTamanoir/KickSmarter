@@ -4,14 +4,15 @@ namespace Kicksmarter {
 
   /* @entry */
   const post_project = (
-    param
-      : {
+    param:
+      {
         cid_metadata: string,
         milestones: list<TYPES.milestone>,
         funding_due_date: timestamp
       },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
+
     assert_with_error(
       String.length(param.cid_metadata) > (0 as nat),
       "metadata must be non-empty"
@@ -26,7 +27,9 @@ namespace Kicksmarter {
     );
 
     let old_start_date: timestamp = Tezos.get_now();
-    let old_due_date: timestamp = old_start_date + 1;
+    let old_due_date: timestamp = old_start_date;
+    let review_duration: int = 172_800;
+
     for (const milestone of param.milestones) {
       assert_with_error(
         milestone.required_amount > (0 as tez),
@@ -40,9 +43,11 @@ namespace Kicksmarter {
         milestone.due_date > old_due_date,
         "milestone dueDate must be in the future"
       );
-      old_start_date = old_due_date + 1;
-      old_due_date = milestone.due_date
+
+      old_start_date = old_due_date + review_duration;
+      old_due_date = milestone.due_date;
     };
+
     let milestones_map: map<nat, TYPES.milestone> = Map.empty;
     let milestone_idx = 0 as nat;
     for (const milestone of param.milestones) {
@@ -50,12 +55,15 @@ namespace Kicksmarter {
         Map.update(milestone_idx, Some(milestone), milestones_map);
       milestone_idx += (1 as nat)
     };
+
     const sender = Tezos.get_sender();
     const new_projet_id = storage.total_projects;
+
     let target_amount: tez = 0 as tez;
     for (const milestone of param.milestones) {
       target_amount += milestone.required_amount
     };
+
     let new_project: TYPES.project =
       {
         id: new_projet_id,
@@ -70,6 +78,7 @@ namespace Kicksmarter {
         funding_due_date: param.funding_due_date,
         status: FUNDING()
       };
+
     const new_addr_to_projects =
       match(
         Big_map.find_opt(sender, storage.addr_to_projects),
@@ -78,6 +87,7 @@ namespace Kicksmarter {
           None: () => list([new_projet_id])
         }
       );
+
     const new_project_maker: TYPES.project_maker =
       match(
         Big_map.find_opt(sender, storage.project_makers),
@@ -91,6 +101,7 @@ namespace Kicksmarter {
             { nb_project_in_progress: 0 as nat, nb_total_projects: 0 as nat }
         }
       );
+
     const new_storage =
       {
         ...storage,
@@ -111,6 +122,7 @@ namespace Kicksmarter {
         ),
         total_projects: storage.total_projects + (1 as nat)
       };
+
     return [list([]), new_storage]
   };
 
@@ -118,6 +130,7 @@ namespace Kicksmarter {
   /* @entry */
   const abort_project_funding = (param: { id: nat }, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
+
     const sender = Tezos.get_sender();
     const project =
       match(
@@ -127,6 +140,7 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+
     assert_with_error(
       project.owner == sender,
       "only project owner can abort funding"
@@ -135,11 +149,13 @@ namespace Kicksmarter {
       project.status == FUNDING(),
       "project is not in funding state"
     );
+
     let remaining_funds = 0 as tez;
     for (const milestone_elem of project.milestones) {
       let [_, milestone] = milestone_elem;
       remaining_funds += milestone.required_amount
     };
+
     let refund_operations: list<operation> = list([]);
     for (const investor of project.investors) {
       let [address, investment] = investor;
@@ -148,17 +164,13 @@ namespace Kicksmarter {
         {
           Some: (receiver: contract<unit>) => {
             refund_operations =
-              list(
-                [
-                  Tezos.transaction(unit, investment, receiver),
-                  ...refund_operations
-                ]
-              )
+              list([Tezos.transaction(unit, investment, receiver), ...refund_operations])
           },
           None: () => unit
         }
       )
     };
+
     let new_storage =
       {
         ...storage,
@@ -168,6 +180,7 @@ namespace Kicksmarter {
           storage.projects
         )
       };
+
     return [refund_operations, new_storage]
   };
 
@@ -175,11 +188,14 @@ namespace Kicksmarter {
   /* @entry */
   const fund_project = (param: { id: nat }, storage: TYPES.storage)
     : [list<operation>, TYPES.storage] => {
+
     const amount: tez = Tezos.get_amount();
+
     assert_with_error(
       amount > (0 as tez),
       "sent amount must be at least 1 mutez"
     );
+
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -188,7 +204,11 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
-    assert_with_error(project.status == FUNDING(), "Project is not in funding");
+
+    assert_with_error(
+      project.status == FUNDING(),
+      "Project is not in funding"
+    );
     assert_with_error(
       Tezos.get_now() < project.funding_due_date,
       "Project funding period has ended"
@@ -197,6 +217,7 @@ namespace Kicksmarter {
       project.current_amount + amount <= project.target_amount,
       "Project is already fully funded"
     );
+
     const sender = Tezos.get_sender();
     const new_project_investors =
       match(
@@ -207,12 +228,14 @@ namespace Kicksmarter {
           None: () => Map.update(sender, Some(amount), project.investors)
         }
       );
+
     const new_project =
       {
         ...project,
         current_amount: project.current_amount + amount,
         investors: new_project_investors
       };
+
     const new_investors =
       match(
         Big_map.find_opt(sender, storage.investors),
@@ -235,12 +258,14 @@ namespace Kicksmarter {
             )
         }
       );
+
     const new_storage =
       {
         ...storage,
         projects: Big_map.update(param.id, Some(new_project), storage.projects),
         investors: new_investors
       };
+
     return [list([]), new_storage]
   };
 
@@ -250,7 +275,9 @@ namespace Kicksmarter {
     param: { id: nat, milestone_id: nat },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
+
     const sender = Tezos.get_sender();
+
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -259,14 +286,17 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+
     assert_with_error(
       project.status != ABORTED(),
       "project has already been aborted"
     );
+
     match(
       Map.find_opt(sender, project.investors),
       { Some: (_) => unit, None: () => failwith("sender is not an investor") }
     );
+
     let milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -275,6 +305,7 @@ namespace Kicksmarter {
           None: () => failwith("milestone not found")
         }
       );
+
     let next_miletone_id = param.milestone_id + (1 as nat);
     let next_milestone =
       match(
@@ -284,7 +315,9 @@ namespace Kicksmarter {
           None: () => failwith("milestone not found")
         }
       );
+
     let now = Tezos.get_now();
+
     assert_with_error(
       now > milestone.due_date,
       "Milestone due date has not yet passed"
@@ -293,40 +326,40 @@ namespace Kicksmarter {
       now < next_milestone.due_date,
       "Next milestone due date has already passed"
     );
+
     let milestone_vote =
       match(
         Map.find_opt(param.milestone_id, project.votes),
         { Some: (vote) => vote, None: () => failwith("vote not found") }
       );
+
     assert_with_error(
       milestone_vote.total_weight > (milestone.required_amount / (2 as nat)),
       "Milstone abort has not been approved by the majority of investors"
     );
+
     let remaining_funds = 0 as tez;
     for (const milestone_elem of project.milestones) {
       let [_, milestone] = milestone_elem;
       remaining_funds += milestone.required_amount
     };
+
     let refund_operations: list<operation> = list([]);
     for (const investor of project.investors) {
       let [address, investment] = investor;
       let interest = (investment / project.target_amount) * remaining_funds;
+
       match(
-        (Tezos.get_contract_opt(address) as option<contract<unit>>),
+        Tezos.get_contract_opt(address),
         {
           Some: (receiver: contract<unit>) => {
-            refund_operations =
-              list(
-                [
-                  Tezos.transaction(unit, interest, receiver),
-                  ...refund_operations
-                ]
-              )
+            refund_operations = list([Tezos.transaction(unit, interest, receiver), ...refund_operations])
           },
           None: () => unit
         }
       )
     };
+
     let new_storage =
       {
         ...storage,
@@ -336,6 +369,7 @@ namespace Kicksmarter {
           storage.projects
         )
       };
+
     return [refund_operations, new_storage]
   };
 
@@ -345,7 +379,9 @@ namespace Kicksmarter {
     param: { id: nat, milestone_id: nat },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
+
     const sender = Tezos.get_sender();
+
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -354,6 +390,7 @@ namespace Kicksmarter {
           None: () => failwith("invalid project ID")
         }
       );
+
     assert_with_error(
       project.status == IN_PROGRESS() || project.status == FUNDING(),
       "Project is not in progress"
@@ -366,6 +403,7 @@ namespace Kicksmarter {
       sender == project.owner,
       "only project owner can claim milestone"
     );
+
     const milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -374,14 +412,20 @@ namespace Kicksmarter {
           None: () => failwith("invalid milestone ID")
         }
       );
+
     assert_with_error(
-      milestone.due_date > Tezos.get_now(),
+      milestone.due_date < Tezos.get_now(),
+      "milestone must not have ended to be claimed"
+    );
+    assert_with_error(
+      milestone.start_date > Tezos.get_now(),
       "milestone must have started to be claimed"
     );
     assert_with_error(
       milestone.required_amount != (0 as tez),
       "milestone already claimed"
     );
+
     const new_project =
       {
         ...project,
@@ -392,16 +436,20 @@ namespace Kicksmarter {
         ),
         status: IN_PROGRESS()
       };
+
     const new_storage =
       {
         ...storage,
         projects: Big_map.update(param.id, Some(new_project), storage.projects)
       };
+
     let receiver =
       Tezos.get_contract_with_error(sender, "Contract not found.") as
         contract<unit>;
+
     let send_fund_op =
       Tezos.transaction(unit, milestone.required_amount, receiver);
+
     return [list([send_fund_op]), new_storage]
   }
 
@@ -411,6 +459,7 @@ namespace Kicksmarter {
     param: { id: nat, milestone_id: nat },
     storage: TYPES.storage
   ): [list<operation>, TYPES.storage] => {
+
     const project =
       match(
         Big_map.find_opt(param.id, storage.projects),
@@ -419,10 +468,12 @@ namespace Kicksmarter {
           None: () => failwith("project not found")
         }
       );
+
     assert_with_error(
       project.status == IN_PROGRESS(),
       "Project is not in progress"
     );
+
     let milestone =
       match(
         Map.find_opt(param.milestone_id, project.milestones),
@@ -431,10 +482,12 @@ namespace Kicksmarter {
           None: () => failwith("milestone not found")
         }
       );
+
     assert_with_error(
       milestone.due_date < Tezos.get_now(),
       "milestone must be finished to be disapproved"
     );
+
     const sender = Tezos.get_sender();
     const weight =
       match(
@@ -444,40 +497,31 @@ namespace Kicksmarter {
           None: () => failwith("sender has not voted yet")
         }
       );
+
     const new_storage =
       {
         ...storage,
         projects: Big_map.update(
           param.id,
-          Some(
-            {
-              ...project,
-              votes: Map.update(
-                param.milestone_id,
-                Some(
-                  match(
-                    Map.find_opt(param.milestone_id, project.votes),
-                    {
-                      Some: (vote) =>
-                        {
-                          total_weight: vote.total_weight + weight,
-                          voters: Set.add(sender, vote.voters)
-                        },
-                      None: () =>
-                        {
-                          total_weight: weight,
-                          voters: Set.literal(list([sender]))
-                        }
-                    }
-                  )
-                ),
-                project.votes
-              )
-            }
-          ),
+          Some({
+            ...project,
+            votes: Map.update(
+              param.milestone_id,
+              Some(match(Map.find_opt(param.milestone_id, project.votes),
+                {
+                  Some: (vote) =>
+                    { total_weight: vote.total_weight + weight, voters: Set.add(sender, vote.voters) },
+                  None: () =>
+                    { total_weight: weight, voters: Set.literal(list([sender])) }
+                }
+              )),
+              project.votes
+            )
+          }),
           storage.projects
         )
       };
+
     return [list([]), new_storage]
   };
 
