@@ -1,5 +1,9 @@
 import { useRouter } from 'next/router';
+<<<<<<< HEAD
 import { useState, useEffect } from 'react';
+=======
+import { useState } from 'react';
+>>>>>>> 95275d6 (feat: projects list + supported project page)
 import { VStack, HStack, Text, Image, Stepper, useSteps, Step, StepIndicator, StepSeparator, StepTitle, StepDescription, StepStatus, StepIcon, StepNumber, Box, Divider, Card, Stack, CardBody, Heading, CardFooter, Button } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 
