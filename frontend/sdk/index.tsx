@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react';
 import TKicksmarter from './types/TKicksmarter';
 import TProject from './types/TProject';
-import { useTezosContext } from '@/src/contexts/TezosContext';
+import { useTezosContext } from '../src/contexts/TezosContext';
 import { _assertWalletConnection, _getMethods, _getProject, _getStorage } from './utils';
 import { pushImageToIPFS, getMetadataFromIPFS, getImageFromIPFS, pushMetadataToIPFS } from './ipfs';
 import TMilestone from './types/TMilestone';

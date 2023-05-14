@@ -1,6 +1,6 @@
 export const GHOSTNET_RPC_URL = 'https://ghostnet.tezos.marigold.dev';
 
-export const CONTRACT_ADDRESS = process.env.CONTRACT_ADDRESS ?? '';
+export const CONTRACT_ADDRESS = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS ?? '';
 
 export const PINATA_UPLOAD_URL = 'https://api.pinata.cloud/pinning/pinJSONToIPFS';
 

@@ -28,11 +28,11 @@ import {
 } from '@chakra-ui/react';
 import { CheckCircleIcon } from '@chakra-ui/icons';
 
-import Navbar from '@/src/components/Navbar';
-import { useKickSmarter } from '@/sdk';
-import TProject from '@/sdk/types/TProject';
-import TMilestone from '@/sdk/types/TMilestone';
-import { useTezosContext } from '@/src/contexts/TezosContext';
+import Navbar from '@/components/Navbar';
+import { useKickSmarter } from '@/../sdk';
+import TProject from '@/../sdk/types/TProject';
+import TMilestone from '@/../sdk/types/TMilestone';
+import { useTezosContext } from '@/contexts/TezosContext';
 
 type Metadata = {
 	title: string;
@@ -44,8 +44,7 @@ const ProjectDesc = (): JSX.Element => {
 	const router = useRouter();
 
 	const KickSmarter = useKickSmarter();
-	const { wallet, tezos, connectWallet, disconnectWallet, connected } = useTezosContext();
-
+	const { wallet } = useTezosContext();
 	const [project, setProject] = useState<TProject>();
 	const [metadata, setMetadata] = useState<Metadata>();
 	const [image, setImage] = useState<string>('');
@@ -58,20 +57,27 @@ const ProjectDesc = (): JSX.Element => {
 	});
 
 	useEffect(() => {
+		if (router.query.id === undefined) return;
+
 		const projectId: number = parseInt(router.query.id as string);
+
 		KickSmarter.getProject(projectId)
 			.then(async (kickProject) => {
 				setProject(kickProject);
-				setAddress(await wallet?.getPKH());
+				setAddress((await wallet?.getPKH()) as string);
+
 				try {
-					setMetadata(await KickSmarter.getMetadataFromIPFS(kickProject.cid_metadata));
-					setImage(await KickSmarter.getImageFromIPFS(metadata?.images[0] as string));
+					let metadata_ = await KickSmarter.getMetadataFromIPFS(kickProject.cid_metadata);
+					let images_ = await KickSmarter.getImageFromIPFS(metadata_.images[0] as string);
+
+					setMetadata(metadata_);
+					setImage(images_);
 				} catch (e) {
 					console.error(e);
 				}
 			})
 			.catch((e) => console.error(e));
-	}, [router, project]);
+	}, [router.query.id]);
 
 	const supportProject = () => {
 		if (!project || fundValue <= 0 || project.current_amount + fundValue > project.target_amount) return;
@@ -148,7 +154,7 @@ const ProjectDesc = (): JSX.Element => {
 										w='40%'
 										type='number'
 										value={fundValue}
-										onChange={(event) => setFundValue(event.target.value)}
+										onChange={(event) => setFundValue(event.target.valueAsNumber)}
 									/>
 									<Button bg='#7CB4C4' onClick={supportProject}>
 										Support this project
@@ -172,7 +178,7 @@ const ProjectDesc = (): JSX.Element => {
 							</Text>
 							{project.status === 'IN_PROGRESS' && (
 								<>
-									<Button bg='#7CB4C4' onClick={disapproveMileston}>
+									<Button bg='#7CB4C4' onClick={() => disapproveMileston(0)}>
 										Disaprove milestone
 									</Button>
 								</>
@@ -181,7 +187,6 @@ const ProjectDesc = (): JSX.Element => {
 					</VStack>
 				</HStack>
 
-				{/* Support the project */}
 				{project?.investors.find((value) => value.address === address) && (
 					<>
 						<HStack spacing='10px' pt='20px' pb='20px'>

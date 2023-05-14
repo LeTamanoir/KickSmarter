@@ -1,6 +1,6 @@
 import React from 'react';
 import { Heading, VStack, Avatar, Button, Flex } from '@chakra-ui/react';
-import Navbar from '@/src/components/Navbar';
+import Navbar from '@/components/Navbar';
 
 const Persons = [
 	{

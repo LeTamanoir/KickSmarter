@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { VStack, Text, Box, SimpleGrid, Input, InputGroup, Button, InputLeftElement } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
-import Navbar from '@/src/components/Navbar';
-import Project from '@/src/components/Project';
-import { useKickSmarter } from '../sdk';
-import TProject from '../sdk/types/TProject';
+import Navbar from '@/components/Navbar';
+import Project from '@/components/Project';
+import { useKickSmarter } from '@/../sdk';
+import TProject from '@/../sdk/types/TProject';
 
 const Projects = () => {
 	const KickSmarter = useKickSmarter();
@@ -18,7 +18,7 @@ const Projects = () => {
 				setProjects(kickProjects);
 			})
 			.catch((e) => console.error(e));
-	}, [projects]);
+	}, []);
 
 	const [search, setSearch] = useState<string>(''); // TODO
 	const [nElem, setnElem] = useState<number>(9);
@@ -37,7 +37,6 @@ const Projects = () => {
 					</InputGroup>
 				</VStack>
 
-				{/* Explore projects */}
 				<Text fontSize='xl' fontWeight='bold'>
 					Explore our {projects.length} projects
 				</Text>
@@ -54,6 +53,7 @@ const Projects = () => {
 							</Box>
 						))}
 					</SimpleGrid>
+
 					{nElem < projects.length && (
 						<Button size='md' mt='' bg='#7CB4C4' onClick={() => setnElem(nElem + 9)}>
 							Load more

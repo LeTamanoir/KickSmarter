@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import TMilestone from '@/sdk/types/TMilestone';
+import TMilestone from '@/../sdk/types/TMilestone';
 import {
 	Modal,
 	ModalOverlay,
@@ -12,9 +12,8 @@ import {
 	Button,
 	FormControl,
 	FormLabel,
-	Spacer,
 } from '@chakra-ui/react';
-import { useKickSmarter } from '@/sdk';
+import { useKickSmarter } from '@/../sdk';
 
 type NewMilestoneProps = {
 	isOpen: boolean;
@@ -59,12 +58,12 @@ const NewMilestone = ({ isOpen, onClose, confirm }: NewMilestoneProps) => {
 							<Input value={description} onChange={(event) => setDesc(event.target.value)} />
 						</FormControl>
 
-						<FormControl>
-							<FormLabel>Pledge of the milestone</FormLabel>
+						<FormControl marginTop='3'>
+							<FormLabel>Amount required for the milestone</FormLabel>
 							<Input type='number' value={amount} onChange={(event) => setAmout(event.target.valueAsNumber)} />
 						</FormControl>
 
-						<FormControl>
+						<FormControl marginTop='3'>
 							<FormLabel>Start date</FormLabel>
 							<Input
 								type='date'
@@ -79,8 +78,8 @@ const NewMilestone = ({ isOpen, onClose, confirm }: NewMilestoneProps) => {
 							/>
 						</FormControl>
 
-						<FormControl>
-							<FormLabel marginTop='5'>End date of the funding</FormLabel>
+						<FormControl marginTop='3'>
+							<FormLabel>End date</FormLabel>
 							<Input
 								type='date'
 								value={
@@ -96,7 +95,7 @@ const NewMilestone = ({ isOpen, onClose, confirm }: NewMilestoneProps) => {
 					</ModalBody>
 
 					<ModalFooter>
-						<Button bg='#E8D5B5' onClick={onClose}>
+						<Button bg='#E8D5B5' onClick={onClose} me='2'>
 							Close
 						</Button>
 						<Button bg='#7CB4C4' onClick={createMilestone}>

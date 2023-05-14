@@ -1,4 +1,4 @@
-import Navbar from '@/src/components/Navbar';
+import Navbar from '@/components/Navbar';
 import {
 	FormControl,
 	Input,
@@ -18,9 +18,9 @@ import {
 	useDisclosure,
 } from '@chakra-ui/react';
 import { useState } from 'react';
-import TMilestone from '@/sdk/types/TMilestone';
-import { useKickSmarter } from '@/sdk';
-import NewMilestone from '@/src/components/NewMilestone';
+import TMilestone from '@/../sdk/types/TMilestone';
+import { useKickSmarter } from '@/../sdk';
+import NewMilestone from '@/components/NewMilestone';
 
 const Create = () => {
 	const { isOpen, onOpen, onClose } = useDisclosure();
@@ -52,7 +52,7 @@ const Create = () => {
 	};
 
 	return (
-		<VStack w='100%'>
+		<VStack w='100%' mb='10'>
 			<Navbar />
 			<VStack w='100%' px='550px' pt='30px' spacing='10px'>
 				<Text fontSize='2xl'>Create a new project</Text>
