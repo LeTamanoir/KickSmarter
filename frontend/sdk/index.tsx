@@ -1,18 +1,23 @@
 import { createContext, useContext } from "react";
-import TKicksmarterCtx from "./types/TKicksmarterCtx";
+import TKicksmarter from "./types/TKicksmarter";
 import TProject from "./types/TProject";
 import { useTezosContext } from "@/src/contexts/TezosContext";
 import {
+  _assertWalletConnection,
   _getMethods,
   _getProject,
   _getStorage,
-  pushImageToIPFS,
-  pushMetadataToIPFS,
 } from "./utils";
+import {
+  pushImageToIPFS,
+  getMetadataFromIPFS,
+  getImageFromIPFS,
+  pushMetadataToIPFS,
+} from "./ipfs";
 import TMilestone from "./types/TMilestone";
 
-const KicksmarterCtx = createContext<TKicksmarterCtx>({} as TKicksmarterCtx);
-const useKickSmarter = () => useContext(KicksmarterCtx);
+const Kicksmarter = createContext<TKicksmarter>({} as TKicksmarter);
+const useKickSmarter = () => useContext(Kicksmarter);
 
 const KicksmarterProvider = ({
   contractAddress,
@@ -51,9 +56,7 @@ const KicksmarterProvider = ({
     milestones: TMilestone[];
     funding_due_date: Date;
   }): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -62,16 +65,14 @@ const KicksmarterProvider = ({
       .send();
   };
 
-  const vote = async ({
+  const disapproveMilestone = async ({
     project_id,
     milestone_id,
   }: {
     project_id: number;
     milestone_id: number;
   }): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -82,9 +83,7 @@ const KicksmarterProvider = ({
     project_id: number,
     amount: number
   ): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -95,9 +94,7 @@ const KicksmarterProvider = ({
     project_id: number,
     milestone_id: number
   ): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -108,9 +105,7 @@ const KicksmarterProvider = ({
     project_id: number,
     milestone_id: number
   ): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -118,9 +113,7 @@ const KicksmarterProvider = ({
   };
 
   const abortProjectFunding = async (project_id: number): Promise<void> => {
-    if (!connected) {
-      throw new Error("Not connected");
-    }
+    _assertWalletConnection(connected);
 
     let methods = await _getMethods(tezos!, contractAddress);
 
@@ -128,8 +121,10 @@ const KicksmarterProvider = ({
   };
 
   return (
-    <KicksmarterCtx.Provider
+    <Kicksmarter.Provider
       value={{
+        getMetadataFromIPFS,
+        getImageFromIPFS,
         abortProjectFunding,
         claimMilestone,
         abortProject,
@@ -138,12 +133,12 @@ const KicksmarterProvider = ({
         getProjects,
         getProject,
         postProject,
-        vote,
+        disapproveMilestone,
         fundProject,
       }}
     >
       {children}
-    </KicksmarterCtx.Provider>
+    </Kicksmarter.Provider>
   );
 };
 
