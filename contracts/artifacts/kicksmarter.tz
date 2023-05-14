@@ -263,7 +263,7 @@
                      IF_NONE { PUSH string "invalid project ID" ; FAILWITH } {} ;
                      PUSH string "Project is not in progress" ;
                      UNIT ;
-                     RIGHT unit ;
+                     LEFT unit ;
                      RIGHT (or unit unit) ;
                      DUP 3 ;
                      CDR ;
@@ -271,6 +271,16 @@
                      CAR ;
                      COMPARE ;
                      EQ ;
+                     UNIT ;
+                     RIGHT unit ;
+                     RIGHT (or unit unit) ;
+                     DUP 4 ;
+                     CDR ;
+                     CAR ;
+                     CAR ;
+                     COMPARE ;
+                     EQ ;
+                     OR ;
                      IF { DROP } { FAILWITH } ;
                      DUP ;
                      CDR ;
