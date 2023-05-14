@@ -1,8 +1,8 @@
-import Address from "./TAddress";
+import Address from './TAddress';
 
 type TInvestor = {
-  address: Address;
-  invested_amount: number;
+	address: Address;
+	invested_amount: number;
 };
 
 export default TInvestor;

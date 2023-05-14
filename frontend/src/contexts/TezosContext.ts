@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
-import TWeb3 from "../types/TWeb3";
+import { createContext, useContext } from 'react';
+import TWeb3 from '../types/TWeb3';
 
 const TezosContext = createContext<TWeb3>({} as TWeb3);
 
