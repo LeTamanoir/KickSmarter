@@ -54,7 +54,7 @@ const Create = () => {
 	return (
 		<VStack w='100%' mb='10'>
 			<Navbar />
-			<VStack w='100%' px='550px' pt='30px' spacing='10px'>
+			<VStack w='200' px='40' pt='30px' spacing='10px'>
 				<Text fontSize='2xl'>Create a new project</Text>
 
 				<FormControl>
@@ -110,7 +110,7 @@ const Create = () => {
 							<Thead>
 								<Tr>
 									<Th>Step</Th>
-									<Th>Pledge</Th>
+									<Th>Amount</Th>
 									<Th>Due date</Th>
 								</Tr>
 							</Thead>

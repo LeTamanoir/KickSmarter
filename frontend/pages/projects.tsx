@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { VStack, Text, Box, SimpleGrid, Input, InputGroup, Button, InputLeftElement } from '@chakra-ui/react';
+import { VStack, Text, Box, Input, InputGroup, Button, InputLeftElement, Flex } from '@chakra-ui/react';
 import { Search2Icon } from '@chakra-ui/icons';
 import Navbar from '@/components/Navbar';
 import Project from '@/components/Project';
@@ -26,7 +26,7 @@ const Projects = () => {
 	return (
 		<>
 			<Navbar />
-			<Box mx='300px' mb='30px'>
+			<Box mx='20' mb='30px'>
 				<VStack justify='center' spacing='40px' pt='30px' mb='20px'>
 					<Text fontSize='2xl'>The future of crowdfunding!</Text>
 					<InputGroup w='50%'>
@@ -41,7 +41,15 @@ const Projects = () => {
 					Explore our {projects.length} projects
 				</Text>
 				<VStack mt='30px'>
-					<SimpleGrid columns={3} spacingX='8' spacingY='8' mb='20px'>
+					<Flex
+						wrap='wrap'
+						gap='10'
+						direction={{
+							base: 'column',
+							md: 'row',
+						}}
+						mb='20px'
+					>
 						{projects.slice(0, nElem).map((project) => (
 							<Box key={project.id}>
 								<Project
@@ -52,7 +60,7 @@ const Projects = () => {
 								/>
 							</Box>
 						))}
-					</SimpleGrid>
+					</Flex>
 
 					{nElem < projects.length && (
 						<Button size='md' mt='' bg='#7CB4C4' onClick={() => setnElem(nElem + 9)}>

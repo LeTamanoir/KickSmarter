@@ -12,8 +12,8 @@ const walletOptions: DAppClientOptions = {
 
 const TezosProvider = ({ children }: { children: React.ReactNode }) => {
 	const [tezos, setTezos] = useState<TezosToolkit>(new TezosToolkit(GHOSTNET_RPC_URL));
-	const [wallet, setWallet] = useState<{ wallet: BeaconWallet }>({
-		wallet: new BeaconWallet(walletOptions),
+	const [wallet, setWallet] = useState<{ wallet: BeaconWallet | undefined }>({
+		wallet: undefined,
 	});
 	const [isConnected, setIsConnected] = useState<boolean>(false);
 
@@ -66,8 +66,10 @@ const TezosProvider = ({ children }: { children: React.ReactNode }) => {
 
 	useEffect(() => {
 		(async () => {
-			let activeAccount = await wallet.wallet.client.getActiveAccount();
+			let wallet_ = new BeaconWallet(walletOptions);
+			let activeAccount = await wallet_.client.getActiveAccount();
 
+			setWallet({ wallet: wallet_ });
 			setIsConnected(activeAccount !== undefined);
 		})();
 	}, []);

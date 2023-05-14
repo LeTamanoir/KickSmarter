@@ -14,7 +14,7 @@ const Connection = () => {
 
 	return (
 		<>
-			<Button bg='#7CB4C4' onClick={buttonAction}>
+			<Button bg={!connected ? '#7CB4C4' : '#ffde5a'} onClick={buttonAction}>
 				<HStack>
 					<Image w='30px' src='/assets/tezos.png' alt='Tezos logo' />
 					<Text>{!connected ? 'Connect wallet' : 'Disconnect wallet'}</Text>
